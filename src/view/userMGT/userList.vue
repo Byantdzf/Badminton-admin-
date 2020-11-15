@@ -82,7 +82,7 @@ export default {
         },
         {
           title: '手机号',
-          key: 'type',
+          key: 'mobile',
           align: 'center',
           editable: true
         },
@@ -90,11 +90,19 @@ export default {
           title: '所属门店',
           key: 'created_at',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            if(params.row.store){
+              return h('span', {
+              }, params.row.store.name)
+            }else{
+              return h('span', '未获取')
+            }
+
+          }
         },
         {
           title: '最近登录时间',
-          key: 'created_at',
+          key: 'updated_at',
           align: 'center',
           editable: true
         },
@@ -102,7 +110,36 @@ export default {
           title: '状态',
           key: 'type',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            if (params.row.is_show) {
+              return h('i-switch', {
+                props: {
+                  size: 'large',
+                  value: Boolean(params.row.is_show)
+                },
+                scopedSlots: {
+                  open: () => h('span', '启用'),
+                  close: () => h('span', '禁用')
+                },
+                on: {
+                  'on-change': (value) => {
+                    this.$Message.success('无接口!')
+                    return
+                    console.log(value)
+                    let data = {
+                      is_show: value
+                    }
+                    uAxios.post(`users/${params.row.id}`, data)
+                      .then(res => {
+                        if(res.code == 0){
+                          this.$Message.success('操作成功!')
+                        }
+                      })
+                  }
+                }
+              })
+            }
+          }
         },
         {
           title: '操作',
@@ -110,10 +147,12 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('span', {
+              h('Button', {
+                props: {
+                  type: 'primary'
+                },
                 style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
+                  marginRight: '8px'
                 },
                 on: {
                   click: () => {
@@ -123,26 +162,7 @@ export default {
                     })
                   }
                 }
-              }, '查看详情'),
-              h('span', {
-                style: {
-                  color: '#ed4014'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定标记为已处理吗？</p>`,
-                      onOk: () => {
-                        this.$Message.info('点击了确认')
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
-                  }
-                }
-              }, '禁用')
+              }, '查看详情')
             ])
           }
         }
@@ -173,19 +193,11 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`users?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
             console.log(this.information)
           }

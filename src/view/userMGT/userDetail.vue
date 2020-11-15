@@ -7,29 +7,30 @@
             <Col span="6">
               <Card title="基本信息">
                 <FormItem label="头像：" prop="account">
-                  <img src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg"
+                  <img :src="userInfo.photo"
                        alt="" width="80rpx" style="margin: 12px 22px 0 -6px;border: 2px solid #f3f3f3;">
                 </FormItem>
                 <FormItem label="用户ID" prop="account">
-                  <span>121212</span>
+                  <span>{{userInfo.id}}</span>
                 </FormItem>
                 <FormItem label="昵称" prop="account">
-                  <span>李宁</span>
+                  <span>{{userInfo.name}}</span>
                 </FormItem>
                 <FormItem label="手机号" prop="account">
-                  <span>1271682678126</span>
+                  <span>{{userInfo.mobile}}</span>
                 </FormItem>
                 <FormItem label="所属门店" prop="account">
                   <span>李宁店铺</span>
                 </FormItem>
                 <FormItem label="账号状态" prop="account">
-                  <span>禁用</span>
+                  <span v-if="userInfo.is_show">启用</span>
+                  <span v-else>禁用</span>
                 </FormItem>
                 <FormItem label="注册时间" prop="account">
-                  <span>2020/12/12 13:00</span>
+                  <span>{{userInfo.created_at}}</span>
                 </FormItem>
                 <FormItem label="最近登录时间" prop="account">
-                  <span>2020/12/12 13:00</span>
+                  <span>{{userInfo.updated_at}}</span>
                 </FormItem>
               </Card>
             </Col>
@@ -438,8 +439,10 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`users/1?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
+          self.userInfo = res.data.data
+          console.log(self.userInfo)
           let result = res.data.data
           if (result.data) {
             self.information = result.data.map((item) => {

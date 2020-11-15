@@ -56,7 +56,7 @@ export default {
         },
         {
           title: '角色ID',
-          key: 'adminId',
+          key: 'id',
           align: 'center',
           width: 100,
           editable: true
@@ -69,13 +69,48 @@ export default {
         },
         {
           title: '备注',
-          key: 'type',
+          key: 'description',
           align: 'center',
           editable: true
         },
         {
           title: '状态',
-          key: 'admin_type',
+          key: 'created_at',
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.is_show) {
+              return h('i-switch', {
+                props: {
+                  size: 'large',
+                  value: Boolean(params.row.is_show)
+                },
+                scopedSlots: {
+                  open: () => h('span', '启用'),
+                  close: () => h('span', '禁用')
+                },
+                on: {
+                  'on-change': (value) => {
+                    this.$Message.success('无接口!')
+                    return
+                    console.log(value)
+                    let data = {
+                      is_show: value
+                    }
+                    uAxios.post(`users/${params.row.id}`, data)
+                      .then(res => {
+                        if(res.code == 0){
+                          this.$Message.success('操作成功!')
+                        }
+                      })
+                  }
+                }
+              })
+            }
+          }
+        },
+        {
+          title: '创建时间',
+          key: 'created_at',
           align: 'center',
           editable: true
         },
@@ -147,22 +182,12 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`roles?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
-          if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
-          }
+          self.information = result.data
+          self.orgTotal = result.total
+          console.log(this.information)
           self.loading = false
         })
     },

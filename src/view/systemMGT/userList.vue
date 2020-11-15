@@ -2,19 +2,20 @@
   <div>
     <Card>
       <Tabs style="margin-top: 12px;">
-        <TabPane label="用户列表" name="adminList">
+        <TabPane label="管理员列表" name="adminList">
           <Input
             v-model="searchKeyword"
             @on-enter="handleSearch"
             placeholder="搜索用户..."
             style="width: 160px; margin-bottom: 22px;"/>
-          <span @click="handleSearch">
-                    <Button type="warning" icon="ios-search" style="margin-left: 12px; margin-bottom: 22px;">搜索</Button>
+          <span >
+                    <Button type="warning" icon="ios-search" style="margin-left: 12px; margin-bottom: 22px;" @click="handleSearch">搜索</Button>
                     <Button type="primary" icon="md-add" style="margin-left: 12px; margin-bottom: 22px;" @click="gotoPage('addAuthorizationUser')">新增管理员</Button>
+                    <Button type="error" icon="ios-trash-outline" style="margin-left: 12px; margin-bottom: 22px;" @click="deleteUser()">批量删除</Button>
                 </span>
-          <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
+          <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border @on-selection-change="handleSelect"></Table>
           <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @click="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
+            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll" style="margin-right: 22px;">全选</Checkbox>
             <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
               <Option value="启用" label="启用"></Option>
               <Option value="禁用" label="禁用"></Option>
@@ -48,6 +49,7 @@ export default {
       searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
       id: '',
+      userListId: [],
       orgColumns: [
         {
           type: 'selection',
@@ -55,65 +57,73 @@ export default {
           align: 'center'
         },
         {
-          title: 'ID',
-          key: 'adminId',
+          title: '管理员账号',
+          key: 'account',
           align: 'center',
           width: 100,
           editable: true
         },
         {
-          title: 'UserID',
-          key: 'id',
-          align: 'center',
-          width: 100,
-          editable: true
-        },
-        {
-          title: '用户名',
+          title: '姓名',
           key: 'name',
           align: 'center',
           editable: true
         },
         {
-          title: '头像',
-          key: 'photo',
+          title: '角色',
+          key: 'name',
+          align: 'center',
           render: (h, params) => {
-            return h('img', {
-              attrs: {
-                src: params.row.photo
-              },
-              style: {
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                marginTop: '6px',
-                border: '4px solid #f4f4f4'
-              },
-              on: {
-                click: () => {
-                  let argu = {id: params.row.id}
-                  this.$router.push({
-                    name: 'user_detail',
-                    params: argu
-                  })
+            if(params.row.role) {
+              return h('span', params.row.role.name)
+            }else{
+              return h('span','错误')
+            }
+          }
+        },
+        {
+          title: '手机号',
+          key: 'mobile',
+          align: 'center',
+          editable: true
+        },
+        {
+          title: '上次登录时间',
+          key: 'updated_at',
+          align: 'center',
+          editable: true
+        },
+        {
+          title: '状态',
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.is_show) {
+              return h('i-switch', {
+                props: {
+                  size: 'large',
+                  value: Boolean(params.row.is_show)
+                },
+                scopedSlots: {
+                  open: () => h('span', '启用'),
+                  close: () => h('span', '禁用')
+                },
+                on: {
+                  'on-change': (value) => {
+                    console.log(value)
+                    let data = {
+                      is_show: value
+                    }
+                    uAxios.post(`users/${params.row.id}`, data)
+                      .then(res => {
+                        if(res.code == 0){
+                          this.$Message.success('操作成功!')
+                        }
+                      })
+                  }
                 }
-              }
-            })
-          },
-          width: 80,
-          align: 'center'
-        },
-        {
-          title: '单身/介绍人',
-          key: 'type',
-          align: 'center',
-          editable: true
-        },
-        {
-          title: '权限类型',
-          key: 'admin_type',
-          align: 'center',
-          editable: true
+              })
+            }
+          }
         },
         {
           title: '操作',
@@ -132,30 +142,30 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'addAuthorizationUser',
-                      query: 'id=12'
+                      query: {id: params.row.id}
                     })
                   }
                 }
-              }, '编辑'),
-              h('Button', {
-                props: {
-                  type: 'error'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除权限?</p>`,
-                      onOk: () => {
-                        this.removeAdmin(params.row.adminId, params.index)
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
-                  }
-                }
-              }, '移除')
+              }, '编辑')
+              // h('Button', {
+              //   props: {
+              //     type: 'error'
+              //   },
+              //   on: {
+              //     click: () => {
+              //       this.$Modal.confirm({
+              //         title: '温馨提示',
+              //         content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除权限?</p>`,
+              //         onOk: () => {
+              //           this.removeAdmin(params.row.adminId, params.index)
+              //         },
+              //         onCancel: () => {
+              //           console.log('点击了取消')
+              //         }
+              //       })
+              //     }
+              //   }
+              // }, '移除')
             ])
           }
         }
@@ -167,12 +177,42 @@ export default {
   methods: {
     gotoPage (title) {
       this.$router.push({
-        name: title,
-        query: {id: '12'}
+        name: title
       })
     },
+    handleSelect(selection){
+      let ids = []
+      for (let item of  selection){
+        ids.push(item.id);
+      }
+      this.userListId = ids
+      console.log(selection ,'asd')
+    },
+    deleteUser() {
+      let vm = this
+      if (vm.userListId.length < 1) return vm.$Message.error('请先选择你要删除的用户!')
+      console.log(vm.userListId)
+      vm.$Modal.confirm({
+          title: '温馨提示',
+          content: `<p>是否将选中用户删除?</p>`,
+          onOk: () => {
+            uAxios.delete(`admins`, vm.userListId)
+              .then(res => {
+                if(res.code == 0){
+                  vm.$Message.success('操作成功!')
+                  vm.page = 1
+                  vm.list = []
+                  vm.getlist()
+                }
+              })
+          },
+          onCancel: () => {
+            console.log('点击了取消')
+          }
+        })
+    },
     handleSelectAll (status) {
-      this.$refs.selection.selectAll(status)
+      this.$refs.selection.selectAll(this.CheckboxValue)
     },
     batchFn () {
       this.$Message.info('This is a test');
@@ -183,19 +223,11 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`admins?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
             console.log(this.information)
           }

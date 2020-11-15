@@ -30,14 +30,14 @@ export const staticRouters = [
       path: '/home',
       name: 'home',
       meta: {notCache: true, hideInMenu: true, title: '首页'},
-      component: routerMap['Home']
+      component: () => import('@/view/systemMGT/userList.vue')
     }]
   },
   {
     path: '/',
     name: '系统管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'logo-windows',
@@ -85,7 +85,7 @@ export const staticRouters = [
     path: '/',
     name: '用户管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'ios-contacts',
@@ -110,7 +110,7 @@ export const staticRouters = [
     path: '/',
     name: '门店管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'logo-foursquare',
@@ -147,7 +147,7 @@ export const staticRouters = [
     path: '/',
     name: '预约管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'ios-time',
@@ -172,7 +172,7 @@ export const staticRouters = [
     path: '/',
     name: '订单管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'ios-list-box',
@@ -197,7 +197,7 @@ export const staticRouters = [
     path: '/',
     name: '评价管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'md-star-half',
@@ -222,7 +222,7 @@ export const staticRouters = [
     path: '/',
     name: '财务管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'logo-yen',
@@ -247,7 +247,7 @@ export const staticRouters = [
     path: '/',
     name: '课程管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'ios-paper',
@@ -284,7 +284,7 @@ export const staticRouters = [
     path: '/',
     name: '运动轨迹管理',
     meta: {
-      access: ['admin'],
+      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'logo-playstation',
@@ -311,7 +311,7 @@ export const staticRouters = [
     meta: {
       icon: 'logo-windows',
       title: 'admin',
-      access: ['admin', 'paas_admin', 'matcher', 'worker'],
+      access: [],
       notCache: false,
       hideInMenu: true
     },

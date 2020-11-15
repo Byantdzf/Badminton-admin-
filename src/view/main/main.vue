@@ -5,17 +5,9 @@
       <side-menu accordion ref="sideMenu" :active-name="$route.name" :collapsed="collapsed"
                  @on-select="turnToPage" :menu-list="menuList">
         <!-- 需要放在菜单上面的内容，如Logo，写在side-menu标签内部，如下 -->
-        <div class="logo-con" style="text-align: center" v-if="access == 'admin'">
+        <div class="logo-con" style="text-align: center" >
           <img v-show="!collapsed" :src="maxLogo" key="max-logo"/>
           <img v-show="collapsed" :src="minLogo" key="min-logo"/>
-        </div>
-        <div class="logo-con" style="text-align: center" v-else>
-          <div class="box" v-show="!collapsed">
-            <p class="animate">
-              {{paasName}}
-            </p>
-          </div>
-          <img v-show="collapsed" :src="paasLogo" key="min-logo"/>
         </div>
         <!--<div class="logo-con" v-else>-->
           <!--<img v-show="!collapsed" src="https://images.ufutx.com/201907/29/99490f3fea0ac04d903a55b75e1784dd.jpeg" />-->

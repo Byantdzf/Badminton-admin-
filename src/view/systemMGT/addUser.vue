@@ -19,13 +19,9 @@
       <FormItem label="确认密码" prop="confirmPassword">
         <Input v-model="formValidate.confirmPassword" placeholder="请输入" style="width: 320px;"></Input>
       </FormItem>
-      <FormItem label="角色选择" prop="role" style="width: 200px;">
-        <Select v-model="formValidate.role" placeholder="请选择角色">
-          <Option value="beijing">财务</Option>
-          <Option value="shanghai">订单</Option>
-          <Option value="shenzhen">管理</Option>
-          <Option value="shenzhen">商务</Option>
-          <Option value="shenzhen">运营</Option>
+      <FormItem label="角色选择" prop="role_id" style="width: 200px;">
+        <Select v-model="formValidate.role_id" placeholder="请选择角色">
+          <Option :value="item.id" v-for="item of roleList">{{item.name}}</Option>
         </Select>
       </FormItem>
       <FormItem label="名字" prop="name">
@@ -34,11 +30,11 @@
       <FormItem label="手机" prop="mobile">
         <Input v-model="formValidate.mobile" placeholder="请输入" style="width: 320px;"></Input>
       </FormItem>
-      <FormItem label="E-mail" prop="mail">
-        <Input v-model="formValidate.mail" placeholder="请输入" style="width: 320px;"></Input>
+      <FormItem label="E-mail" prop="email">
+        <Input v-model="formValidate.email" placeholder="请输入" style="width: 320px;"></Input>
       </FormItem>
-      <FormItem label="备注" prop="desc">
-        <Input v-model="formValidate.desc" type="textarea" :autosize="{minRows: 2,maxRows: 5}" style="width: 320px;"
+      <FormItem label="备注" prop="remark">
+        <Input v-model="formValidate.remark" type="textarea" :autosize="{minRows: 2,maxRows: 5}" style="width: 320px;"
                placeholder="请输入备注..."></Input>
       </FormItem>
       <FormItem>
@@ -65,18 +61,36 @@ export default {
       formValidate: {
         state: 'start', // 状态
         name: '',
-        mail: '',
-        role: '',
+        email: '',
+        role_id: '',
         mobile: '',
         account: '', // 账号
         password: '', // 密码
         confirmPassword: '', // 确认密码
-        desc: ''
-      }
+        remark: ''
+      },
+      roleList: [] // 角色列表
     }
   },
   methods: {
     handleSubmit (name) {
+      let vm = this
+      console.log(vm.formValidate)
+      for (let item in vm.formValidate) {
+        if (!vm.formValidate[item]) {
+          return this.$Message.error('你有信息项未填写，请先填写!')
+        }
+      }
+      if(vm.formValidate.confirmPassword !== vm.formValidate.password) return this.$Message.error('2次密码不一致!')
+      uAxios.post(`admins`, vm.formValidate)
+        .then(res => {
+          console.log(res)
+          if(res.code == 0){
+            this.$Message.success('创建成功!')
+            this.$router.go(-1) ;//返回上一层
+          }
+        })
+
       this.$refs[name].validate((valid) => {
         if (valid) {
           this.$Message.success('Success!')
@@ -105,23 +119,12 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`roles?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
-          if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
-          }
+          self.roleList = result.data
           self.loading = false
+          console.log(self.roleList)
         })
     },
     handleSearch () {

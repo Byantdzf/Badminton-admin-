@@ -29,6 +29,7 @@
 import LoginForm from '_c/login-form'
 import LoginCode from '../../components/login-form/login-code'
 import config from '@/libs/api.request'
+import { setToken } from '@/libs/util'
 import {mapActions} from 'vuex'
 
 export default {
@@ -68,6 +69,7 @@ export default {
             _this.$Message.error(res.message || '你尚未注册')
           }, 1000)
         } else {
+          setToken(res.data.token)
           _this.$Message.loading({
             content: '登录系统中...',
             duration: 1.5,
