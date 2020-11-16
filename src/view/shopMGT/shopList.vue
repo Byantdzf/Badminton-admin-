@@ -19,16 +19,16 @@
                     <Button type="primary" style="margin-left: 12px; " @click="reset('addAuthorizationUser')">重置</Button>
                 </div>
           </Card>
-          <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="gotoPage('editShopDetail')">新增</Button>
+          <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="gotoPage('editShopDetail')">新增门店</Button>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
-          <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @click="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
-            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
-              <Option value="启用" label="启用"></Option>
-              <Option value="禁用" label="禁用"></Option>
-            </Select>
-            <Button @click="batchFn()" >确定</Button>
-          </div>
+<!--          <div style="margin-top:16px;">-->
+<!--            <Checkbox v-model="CheckboxValue" @click="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>-->
+<!--            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">-->
+<!--              <Option value="启用" label="启用"></Option>-->
+<!--              <Option value="禁用" label="禁用"></Option>-->
+<!--            </Select>-->
+<!--            <Button @click="batchFn()" >确定</Button>-->
+<!--          </div>-->
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
                 style="margin-top:30px;margin-bottom:30px;"  show-elevator></Page>
         </TabPane>
@@ -50,11 +50,11 @@ export default {
   },
   data () {
     return {
-      beginDate: '', // 反馈时间
+      beginDate: [],
+      searchKeyword: '', // 搜索
       CheckboxValue: false,
       SelectValue: '全部',
       search: '',
-      searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
       id: '',
       orgColumns: [
@@ -64,7 +64,7 @@ export default {
         //   align: 'center'
         // },
         {
-          title: '序号',
+          title: '门店id',
           key: 'id',
           align: 'center',
           width: 100,
@@ -78,25 +78,42 @@ export default {
         },
         {
           title: '电话',
-          key: 'type',
+          key: 'mobile',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            if (params.row.user) {
+              return h('span', {
+              }, params.row.user.mobile)
+            } else {
+              return h('span', '未获取')
+            }
+          }
         },
         {
           title: '店长',
           key: 'created_at',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            if (params.row.user) {
+              return h('span', {
+              }, params.row.user.name)
+            } else {
+              return h('span', '未获取')
+            }
+          }
         },
         {
           title: '地址',
           key: 'type',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            return h('span', {
+            }, `${params.row.province}.${params.row.city}.${params.row.dist}.${params.row.address}`)
+          }
         },
         {
           title: '更新时间',
-          key: 'type',
+          key: 'updated_at',
           align: 'center',
           editable: true
         },
@@ -115,25 +132,11 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'editShopDetail',
-                      query: {id: 12}
+                      query: { id: params.row.id }
                     })
                   }
                 }
-              }, '查看'),
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'editShopDetail',
-                      query: {id: 12}
-                    })
-                  }
-                }
-              }, '编辑'),
+              }, '查看/编辑'),
               h('span', {
                 style: {
                   color: '#2d8cf0',
@@ -143,9 +146,18 @@ export default {
                   click: () => {
                     this.$Modal.confirm({
                       title: '温馨提示',
-                      content: `<p>你确定标记为已处理吗？</p>`,
+                      content: `<p>你确定删除改门店吗？</p>`,
                       onOk: () => {
-                        this.$Message.info('点击了确认')
+                        uAxios.delete(`stores/${params.row.id}`)
+                          .then(res => {
+                            console.log(res.data)
+                            let result = res.data
+                            if (result.code == 0) {
+                              this.information.splice(params.index, 1)
+                              console.log(result)
+                              this.$Message.info('操作成功')
+                            }
+                          })
                       },
                       onCancel: () => {
                         console.log('点击了取消')
@@ -163,7 +175,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'shopDeduct',
-                      query: {id: 12}
+                      query: { id: params.row.id }
                     })
                   }
                 }
@@ -176,21 +188,51 @@ export default {
       loading: false
     }
   },
+
   methods: {
+    format (time, format) {
+      var t = new Date(time)
+      var tf = function (i) {
+        return (i < 10 ? '0' : '') + i
+      }
+      return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+          case 'yyyy':
+            return tf(t.getFullYear())
+            break
+          case 'MM':
+            return tf(t.getMonth() + 1)
+            break
+          case 'mm':
+            return tf(t.getMinutes())
+            break
+          case 'dd':
+            return tf(t.getDate())
+            break
+          case 'HH':
+            return tf(t.getHours())
+            break
+          case 'ss':
+            return tf(t.getSeconds())
+            break
+        }
+      })
+    },
     reset () {
-      this.$Message.info('This is a 重置')
+      this.beginDate = []
+      this.searchKeyword = '' // 搜索
+      this.$Message.info('已重置')
     },
     gotoPage (title) {
       this.$router.push({
-        name: title,
-        query: {id: '12'}
+        name: title
       })
     },
     handleSelectAll (status) {
       this.$refs.selection.selectAll(status)
     },
     batchFn () {
-      this.$Message.info('This is a test')
+      this.$Message.info('')
     },
     handlePage (num) { // 分页
       this.getlist(num)
@@ -198,19 +240,15 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      if (this.beginDate[0] && this.beginDate[1]) {
+        this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
+        this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
+      }
+      uAxios.get(`stores?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
             console.log(this.information)
           }
@@ -218,6 +256,8 @@ export default {
         })
     },
     handleSearch () {
+      console.log(this.searchKeyword)
+      console.log(this.beginDate)
       this.getlist(1)
     }
   },

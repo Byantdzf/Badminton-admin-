@@ -4,41 +4,37 @@
       <TabPane :label="title" name="adminList">
         <Form :model="formItem" :label-width="100">
           <Row :gutter="22">
-            <Col span="12">
+            <Col span="18">
               <Card title="基础信息">
                 <FormItem label="课程名称：" prop="account">
                   <Input v-model="formItem.name" placeholder="请输入..." style="max-width:220px;"></Input>
                 </FormItem>
-                <FormItem label="课程名称：" prop="account">
-                  <Input v-model="formItem.address" placeholder="请输入..." style="max-width:220px;"></Input>
+                <FormItem label="门店地址：" prop="account">
+                  <Row>
+                    <Input  placeholder="右侧地图定位选择地址" :value="address" style="width: 320px;margin-right: 22px;"/>
+                    <Button type="primary" @click="showMapModel = true">地图定位</Button>
+                  </Row>
                 </FormItem>
                 <FormItem label="所属店长：" prop="account">
-                  <Select v-model="formItem.coach" style="width:100px;margin-right: 16px;">
-                    <Option value="小明" label="小明"></Option>
-                    <Option value="小黄" label="小黄"></Option>
+                  <Select v-model="formItem.user_id" style="width: 220px;" filterable @on-query-change="getGropData">
+                    <Option v-for="item in userList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                   </Select>
                 </FormItem>
                 <FormItem label="课程图片：" prop="account">
-                  <img
-                    src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg"
-                    alt="" width="140">
-                  <Button style="width: 58px;height:58px;line-height: 48px; margin-left: 22px;margin-top: -42px;">
-                    <Icon type="ios-images" size="28"/>
-                  </Button>
+                  <Card style="max-width: 420px;">
+                    <uploadImage v-on:uploadPictures="uploadPicture" :pic="formItem.pic"></uploadImage>
+                  </Card>
                 </FormItem>
-                <FormItem label="课程详请信息：" prop="account">
+                <FormItem label="课程详请信息：" prop="detail">
                   <tinymce-editor ref="editor"
-                                  v-model="formItem.msg"
+                                  v-model="formItem.detail"
                                   style="max-width: 600px;height: 200px;">
                   </tinymce-editor>
                 </FormItem>
-                <FormItem label="营业执照：" prop="account">
-                  <img
-                    src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg"
-                    alt="" width="140">
-                  <Button style="width: 58px;height:58px;line-height: 48px; margin-left: 22px;margin-top: -42px;">
-                    <Icon type="ios-images" size="28"/>
-                  </Button>
+                <FormItem label="营业执照：" prop="business_license">
+                  <Card style="max-width: 420px;">
+                    <uploadImage v-on:uploadPictures="uploadPictureV2" :pic="formItem.business_license"></uploadImage>
+                  </Card>
                 </FormItem>
               </Card>
             </Col>
@@ -46,6 +42,9 @@
         </Form>
       </TabPane>
     </Tabs>
+    <Modal v-model="showMapModel" width="860" title="活动地址" @on-ok="ok">
+      <Geolocation  @getLocation="getLocation"  @hideModal="hideModal" :setLocation="setLocation" ></Geolocation>
+    </Modal>
 <!--    新增规格-->
     <Modal
       v-model="modal"
@@ -85,7 +84,7 @@
         </FormItem>
       </Form>
     </Modal>
-    <Button type="primary" @click="$Message.info('保存成功！')">保存</Button>
+    <Button type="primary" @click="saveFn" style="margin-right: 12px;">保存</Button>
     <Button @click="getBack" style="margin: 22px 0">返回</Button>
   </Card>
 </template>
@@ -94,20 +93,32 @@
 import uAxios from '../../api/index'
 // import config from '../../api/config'
 import dropdown from '../components/dropdown'
+import Geolocation from '../components/Geolocation'
+
 // import Cookies from 'js-cookie'
-import TinymceEditor from '../../../public/richEncapsulation'
+import uploadImage from '../components/uploadImage'
+
+import TinymceEditor from '../../../public/richEncapsulationV2'
 
 export default {
   components: {
     dropdown,
-    TinymceEditor
+    TinymceEditor,
+    uploadImage,
+    Geolocation
   },
   data () {
     return {
+      userID: '',
+      showMapModel: false,
+      userList: [],
+      poster: '',
+      setLocation: [],
       title: '新增门店详情',
+      filePath: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
       sizeList: [
-        {title: '10次卡'},
-        {title: '3次卡'}
+        { title: '10次卡' },
+        { title: '3次卡' }
       ],
       modal: false,
       modal1: false,
@@ -187,25 +198,92 @@ export default {
           time: '2020-10-12 8:00 ~ 2020-10-15 12:00'
         }
       ],
+      address: '',
       formItem: {
         name: '',
-        state: '',
-        ballPark: '',
+        province: '',
+        city: '',
+        dist: '',
         address: '',
-        msg: '其实加个接口不贵，然而思路上有问题。现在国内这些都是高端一款低端一款，加一个输出口的话，高端那个就尴尬了。还有就是这个麦克风阵列他们是测好的，你接到自己的喇叭上，怎么摆他们就管不了了，到时候你喊它未必答应，他们不希望你归罪于产品。亚马逊的dot是带输出的，但是还需要复杂的上网流程，很烦。还有一点，现在这些国内的智能音响基本属于赔钱卖，如果真的就值这个价，漫步者的千元系列应该自己就把这功能加进去了。所以还需要等一段日子。',
-        coach: '',
-        select: '',
-        radio: 'male',
-        checkbox: [],
-        switch: true,
-        date: '',
-        time: '',
-        slider: [20, 50],
-        textarea: ''
+        pic: '',
+        business_license: '',
+        detail: '',
+        location_longitude: '',
+        location_latitude: '',
+        user_id: ''
       }
     }
   },
   methods: {
+    saveFn () {
+      let vm = this
+      console.log(vm.formItem)
+      for (let item in vm.formItem) {
+        if (!vm.formItem[item]) {
+          return this.$Message.error('你有信息项未填写，请先填写!')
+        }
+      }
+      uAxios.post(`stores`, vm.formItem)
+        .then(res => {
+          if (res.data.code == 0) {
+            this.$Message.success('创建成功!')
+            setTimeout(() => {
+              this.$router.go(-1) // 返回上一层
+            }, 800)
+          }
+        })
+    },
+    hideModal (val) {
+      this.showMapModel = val
+    },
+    getLocation (childValue, lnglat) {
+      let { address, dist } = childValue
+      if (address) {
+        console.log(address.split(dist))
+      }
+      this.address = `${childValue.address}`
+      this.formItem.province = childValue.province
+      this.formItem.city = childValue.city != '' ? childValue.city : childValue.province
+      this.formItem.dist = childValue.dist
+      this.formItem.address = address.split(dist)[1]
+      this.formItem.location_longitude = lnglat[0]
+      this.formItem.location_latitude = lnglat[1]
+    },
+    getGropData (value) {
+      let self = this
+      self.loading = true
+      const msg = self.$Message.loading('正在加载中...', 0)
+      uAxios.get(`users?keyword=${value}`)
+        .then(res => {
+          setTimeout(msg, 3000)
+          self.loading = false
+          let result = res.data.data.data
+          this.userList = result.map((item) => {
+            return {
+              name: item.name,
+              id: item.id
+            }
+          })
+        })
+        .catch(error => {
+          self.loading = false
+        })
+    },
+    uploadPicture (image) { // 单
+      this.formItem.pic = image //
+    },
+    uploadPictureV2 (image) {
+      this.formItem.business_license = image //
+    },
+    handleView (name) {
+      this.imgName = name
+      this.visible = true
+    },
+    // 删除
+    handleRemove (file) {
+      this.filePath = ''
+      this.$emit('uploadPictures', this.filePath)
+    },
     addStyle () {
       this.modal = true
     },
@@ -288,7 +366,7 @@ export default {
           let result = res.data.data
           if (result.data) {
             self.information = result.data.map((item) => {
-              let {user} = item
+              let { user } = item
               user.adminId = item.id
               user.created_at = item.created_at
               user.sex = user.sex == 1 ? '男' : '女'
@@ -307,51 +385,50 @@ export default {
     }
   },
   mounted () {
-    if (this.$route.query.id) this.title = '编辑门店详情'
-    this.getlist(1)
+    if (this.$route.query.id) {
+      this.getlist(1)
+      this.title = '编辑门店详情'
+    }
     console.log(this.$route.query)
   }
 }
 </script>
 
 <style lang="less">
-.skuBox {
-  padding: 8px 22px;
-  border: 1px solid #bbbaba;
-  width: 120px;
+.demo-upload-list{
+  display: inline-block;
+  width: 60px;
+  height: 60px;
   text-align: center;
-  margin-top: 12px;
-}
-
-.float_l {
-  float: left
-}
-
-.float_r {
-  float: right
-}
-
-.inlineBlock {
-  display: inline-block
-}
-
-.ivu-tree-title-selected, .ivu-tree-title-selected:hover {
-  background-color: #d5e8fc;
+  line-height: 60px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
   position: relative;
-  padding-right: 22px;
-
-  &:after {
-    content: '';
-    position: absolute;
-    right: 4px;
-    top: 5px;
-    width: 12px;
-    height: 18px;
-    background-image: url("http://images.ufutx.com/201905/15/c09ba0a5ed976879bc389cc9cfd8c43a.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-  }
-
-  /*box-shadow: 1px 1px 12px #d3d3d3;*/
+  box-shadow: 0 1px 1px rgba(0,0,0,.2);
+  margin-right: 4px;
+}
+.demo-upload-list img{
+  width: 100%;
+  height: 100%;
+}
+.demo-upload-list-cover{
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,.6);
+}
+.demo-upload-list:hover .demo-upload-list-cover{
+  display: block;
+}
+.demo-upload-list-cover i{
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  margin: 0 2px;
 }
 </style>

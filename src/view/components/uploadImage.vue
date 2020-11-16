@@ -39,7 +39,7 @@
 import axios from 'axios'
 import uAxios from '../../api'
 import md5 from 'js-md5'
-import config from '../../api/config';
+import config from '../../api/config'
 export default {
   name: 'uploadImage',
   props: ['pic'],
@@ -93,14 +93,14 @@ export default {
         title: '温馨提示',
         duration: 2,
         desc: `${this.file.name}开始上传`
-      });
+      })
       this.imgName = file.name
       this.upload()
       return false
     },
     upload () {
-      var self = this;
-      self.loadingStatus = true;
+      var self = this
+      self.loadingStatus = true
       var formData = new FormData()
       var fileName = md5(self.file.name) + '.' + self.file.type.split('/').pop().toLowerCase()
       var filePath = self.host + '/' + self.ossConfig.dir + fileName
@@ -112,17 +112,17 @@ export default {
       formData.append('signature', self.ossConfig.signature)
       formData.append('file', self.file)
       formData.append('filename', self.file.name)
-      // console.log(formData);
-      axios.post(self.ossConfig.host, formData, {headers: {'Content-Type': 'multipart/form-data'}}
+      console.log(formData)
+      axios.post(self.ossConfig.host, formData, { headers: { 'Content-Type': 'multipart/form-data' } }
       ).then(function (response) {
         if (response.status === 200) {
           console.log(filePath)
           self.filePath = filePath
-          self.$emit('uploadPictures',self.filePath)
+          self.$emit('uploadPictures', self.filePath)
           self.$Notice.success({
             title: '文件上传成功',
             desc: `${filePath}上传成功!`
-          });
+          })
           self.file = null
         } else {
           self.$Modal.error({

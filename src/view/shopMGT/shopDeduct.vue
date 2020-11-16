@@ -6,27 +6,11 @@
           <Row :gutter="16">
             <Col span="16">
               <Card title="规则">
-                <p class="" style="color: #5cadff;text-align: right;margin-top: -50px;margin-bottom: 42px;"  @click.stop="modal = true"> + 新增规则</p>
-                <Table border :columns="columns" :data="data"></Table>
+                <p class="" style="color: #5cadff;text-align: right;margin-top: -50px;margin-bottom: 42px;"  @click.stop="addRule"> + 新增规则</p>
+                <Table border :columns="columns" :data="information"></Table>
               </Card>
             </Col>
           </Row>
-<!--          <Row :gutter="16" style="margin-top: 22px;">-->
-<!--            <Col span="16">-->
-<!--              <Card title='编辑'>-->
-<!--                <Form :label-width="100">-->
-<!--                  <FormItem label="营业额: " >-->
-<!--                    <Input v-model="formValidate.turnover" placeholder="请输入..." style="width: 200px"></Input>-->
-<!--                  </FormItem>-->
-<!--                  <FormItem label="提成（%）: " prop="account">-->
-<!--                    <Input v-model="formValidate.benefit" placeholder="请输入..." style="width: 200px"></Input>-->
-<!--                  </FormItem>-->
-<!--                </Form>-->
-<!--                <Button type="primary" @click="handleSubmit('formValidate')">保存</Button>-->
-<!--                <Button @click="getBack" style="margin-left: 16px">返回</Button>-->
-<!--              </Card>-->
-<!--            </Col>-->
-<!--          </Row>-->
       </TabPane>
     </Tabs>
     <Modal
@@ -36,10 +20,10 @@
       @on-cancel="cancel">
       <Form :label-width="100">
         <FormItem label="营业额: " >
-          <Input v-model="formValidate.turnover" placeholder="请输入..." style="width: 200px"></Input>
+          <Input v-model="formValidate.value" placeholder="请输入..." style="width: 200px"></Input>
         </FormItem>
         <FormItem label="提成（%）: " prop="account">
-          <Input v-model="formValidate.benefit" placeholder="请输入..." style="width: 200px"></Input>
+          <Input v-model="formValidate.ratio" placeholder="请输入..." style="width: 200px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -61,24 +45,13 @@ export default {
   data () {
     return {
       modal: false,
-      formItem1: {
-        name: '',
-        price: '',
-        num: ''
-      },
+      id: '',
       formValidate: {
-        turnover: '', // 营业额
-        benefit: '', // 利益
-        state: 'start', // 状态
-        name: '',
-        mail: '',
-        role: '',
-        mobile: '',
-        account: '', // 账号
-        password: '', // 密码
-        confirmPassword: '', // 确认密码
-        desc: ''
+        value: '',
+        ratio: ''
       },
+      editID: '',
+      information: [],
       indeterminate: true,
       checkAll: false,
       checkAllGroup: ['香蕉', '西瓜'],
@@ -87,28 +60,19 @@ export default {
           title: '营业额',
           width: 150,
           align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('Icon', {
-                props: {
-                  type: 'person'
-                }
-              }),
-              h('strong', '1212')
-            ])
-          }
+          key: 'value'
         },
         {
           title: '提成',
           align: 'center',
           width: 150,
-          key: 'num'
+          key: 'ratio'
         },
         {
           title: '更新时间',
           align: 'center',
           width: 150,
-          key: 'time'
+          key: 'updated_at'
         },
         {
           title: '操作',
@@ -123,219 +87,56 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.show(params.index)
+                    this.addRule(params.index)
                   }
                 }
               }, '编辑')
             ])
           }
         }
-      ],
-      data: [
-        {
-          name: 'John Brown',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jim Green',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Joe Black',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '续费',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jon Snow',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        }
-      ],
-      columns2: [
-        {
-          title: '用户ID',
-          key: 'name',
-          width: 150,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('Icon', {
-                props: {
-                  type: 'person'
-                }
-              }),
-              h('strong', '1212')
-            ])
-          }
-        },
-        {
-          title: '用户名称',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '视频类型',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '视频标题',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '教练名称',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '评星等级',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '评论内容',
-          align: 'center',
-          width: 150,
-          key: 'address'
-        },
-        {
-          title: '发布时间',
-          align: 'center',
-          width: 150,
-          key: 'time'
-        },
-        {
-          title: 'Action',
-          key: 'action',
-          width: 150,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '5px'
-                },
-                on: {
-                  click: () => {
-                    this.show(params.index)
-                  }
-                }
-              }, '查看'),
-              h('span', {
-                style: {
-                  color: '#ed4014',
-                  marginRight: '12px'
-                },
-                on: {
-                  click: () => {
-                    this.show(params.index)
-                  }
-                }
-              }, '删除')
-            ])
-          }
-        }
-      ],
-      data2: [
-        {
-          name: 'John Brown',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jim Green',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Joe Black',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '续费',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jon Snow',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        }
       ]
     }
   },
   methods: {
+    addRule (index) {
+      this.modal = true
+      this.editID = this.information[index].id
+      if (this.editID) {
+        this.formValidate.value = this.information[index].value
+        this.formValidate.ratio = this.information[index].ratio
+      }
+      console.log(this.information[index])
+      console.log(this.formValidate)
+    },
     ok () {
-      this.$Message.info('Clicked ok')
+      let data = {
+        value: this.formValidate.value,
+        ratio: this.formValidate.ratio
+      }
+      if (!this.formValidate.value) return this.$Message.error('请输入营业额！')
+      if (!this.formValidate.ratio) return this.$Message.error('请输入提成！')
+      if (!this.editID) {
+        uAxios.post(`stores/${this.id}/push/money/logs`, data)
+          .then(res => {
+            let result = res.data
+            if (result.data) {
+              this.$Message.info('创建成功！')
+              this.getlist()
+            }
+          })
+      } else {
+        uAxios.put(`stores/push/money/logs/${this.id}`, data)
+          .then(res => {
+            let result = res.data
+            if (result.data) {
+              this.$Message.info('修改成功！')
+              this.getlist()
+            }
+          })
+      }
     },
     cancel () {
-      this.$Message.info('Clicked cancel')
-    },
-    handleCheckAll () {
-      if (this.indeterminate) {
-        this.checkAll = false
-      } else {
-        this.checkAll = !this.checkAll
-      }
-      this.indeterminate = false
-
-      if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
-      } else {
-        this.checkAllGroup = []
-      }
-    },
-    checkAllGroupChange (data) {
-      if (data.length === 3) {
-        this.indeterminate = false
-        this.checkAll = true
-      } else if (data.length > 0) {
-        this.indeterminate = true
-        this.checkAll = false
-      } else {
-        this.indeterminate = false
-        this.checkAll = false
-      }
+      // this.$Message.info('Clicked cancel')
     },
     handleSubmit (name) {
       this.$refs[name].validate((valid) => {
@@ -366,23 +167,13 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`stores/${this.id}/push/money/logs?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
-          let result = res.data.data
+          let result = res.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
+            self.information = result.data
             console.log(this.information)
           }
-          self.loading = false
         })
     },
     handleSearch () {
@@ -390,6 +181,7 @@ export default {
     }
   },
   mounted () {
+    this.id = this.$route.query.id
     this.getlist(1)
     console.log(this.$route.query)
   }

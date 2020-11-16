@@ -23,9 +23,9 @@
                     <Button type="primary" style="margin-left: 12px; " @click="reset('addAuthorizationUser')">重置</Button>
                 </div>
           </Card>
-          <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
+          <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border @on-selection-change="handleSelect"></Table>
           <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @click="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
+            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
             <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
               <Option value="启用" label="启用"></Option>
               <Option value="禁用" label="禁用"></Option>
@@ -60,6 +60,7 @@ export default {
       searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
       id: '',
+      ids: [],
       orgColumns: [
         {
           type: 'selection',
@@ -68,17 +69,25 @@ export default {
         },
         {
           title: '序号',
-          key: 'adminId',
+          key: 'index',
           align: 'center',
           width: 100,
-          editable: true
+          render: (h, params) => {
+            return h('span', {
+            }, params.index + 1)
+          }
         },
         {
           title: '用户ID',
-          key: 'id',
           align: 'center',
-          width: 100,
-          editable: true
+          render: (h, params) => {
+            if (params.row.user) {
+              return h('span', {
+              }, params.row.user.name)
+            } else {
+              return h('span', '未获取')
+            }
+          }
         },
         {
           title: '昵称',
@@ -88,7 +97,7 @@ export default {
         },
         {
           title: '内容',
-          key: 'type',
+          key: 'content',
           align: 'center',
           editable: true
         },
@@ -100,21 +109,42 @@ export default {
         },
         {
           title: '状态',
-          key: 'type',
+          key: 'status',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            if (params.row.status) {
+              return h('span', {
+              }, '已处理')
+            } else {
+              return h('span', '未处理')
+            }
+          }
         },
         {
           title: '处理人',
           key: 'type',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            if (params.row.admin_id) {
+              return h('span', {
+              }, '接口未给')
+            } else {
+              return h('span', '未处理')
+            }
+          }
         },
         {
           title: '处理时间',
-          key: 'created_at',
+          key: 'deal_time',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            if (params.row.deal_time) {
+              return h('span', {
+              }, params.row.deal_time)
+            } else {
+              return h('span', '未处理')
+            }
+          }
         },
         {
           title: '操作',
@@ -133,7 +163,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'feedbackDetail',
-                      query: {id: 12}
+                      query: { id: 12 }
                     })
                   }
                 }
@@ -169,20 +199,28 @@ export default {
     }
   },
   methods: {
+    handleSelect (selection) {
+      let ids = []
+      for (let item of selection) {
+        ids.push(item.id)
+      }
+      this.ids = ids
+      console.log(this.ids, 'asd')
+    },
     reset () {
-      this.$Message.info('This is a 重置');
+      this.$Message.info('This is a 重置')
     },
     gotoPage (title) {
       this.$router.push({
         name: title,
-        query: {id: '12'}
+        query: { id: '12' }
       })
     },
     handleSelectAll (status) {
-      this.$refs.selection.selectAll(status)
+      this.$refs.selection.selectAll(this.CheckboxValue)
     },
     batchFn () {
-      this.$Message.info('This is a test');
+      this.$Message.info('This is a test')
     },
     handlePage (num) { // 分页
       this.getlist(num)
@@ -190,19 +228,11 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`feedback/logs?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
             console.log(this.information)
           }

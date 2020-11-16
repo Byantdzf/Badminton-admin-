@@ -7,7 +7,7 @@
             <Col span="6">
               <Card title="基本信息">
                 <FormItem label="头像：" prop="account">
-                  <img :src="userInfo.photo"
+                  <img :src="userInfo.photo || image"
                        alt="" width="80rpx" style="margin: 12px 22px 0 -6px;border: 2px solid #f3f3f3;">
                 </FormItem>
                 <FormItem label="用户ID" prop="account">
@@ -103,6 +103,7 @@ export default {
         confirmPassword: '', // 确认密码
         desc: ''
       },
+      image: 'https://images.ufutx.com/202011/16/f3defb534a8d8587179cb32f4d561bca.jpeg',
       indeterminate: true,
       checkAll: false,
       checkAllGroup: ['香蕉', '西瓜'],

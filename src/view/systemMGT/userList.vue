@@ -74,10 +74,10 @@ export default {
           key: 'name',
           align: 'center',
           render: (h, params) => {
-            if(params.row.role) {
+            if (params.row.role) {
               return h('span', params.row.role.name)
-            }else{
-              return h('span','错误')
+            } else {
+              return h('span', '错误')
             }
           }
         },
@@ -111,11 +111,11 @@ export default {
                   'on-change': (value) => {
                     console.log(value)
                     let data = {
-                      is_show: value
+                      is_show: value ? '1' : '0'
                     }
                     uAxios.post(`users/${params.row.id}`, data)
                       .then(res => {
-                        if(res.code == 0){
+                        if (res.code == 0) {
                           this.$Message.success('操作成功!')
                         }
                       })
@@ -142,7 +142,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'addAuthorizationUser',
-                      query: {id: params.row.id}
+                      query: { id: params.row.id }
                     })
                   }
                 }
@@ -180,42 +180,42 @@ export default {
         name: title
       })
     },
-    handleSelect(selection){
+    handleSelect (selection) {
       let ids = []
-      for (let item of  selection){
-        ids.push(item.id);
+      for (let item of selection) {
+        ids.push(item.id)
       }
       this.userListId = ids
-      console.log(selection ,'asd')
+      console.log(selection, 'asd')
     },
-    deleteUser() {
+    deleteUser () {
       let vm = this
       if (vm.userListId.length < 1) return vm.$Message.error('请先选择你要删除的用户!')
       console.log(vm.userListId)
       vm.$Modal.confirm({
-          title: '温馨提示',
-          content: `<p>是否将选中用户删除?</p>`,
-          onOk: () => {
-            uAxios.delete(`admins`, vm.userListId)
-              .then(res => {
-                if(res.code == 0){
-                  vm.$Message.success('操作成功!')
-                  vm.page = 1
-                  vm.list = []
-                  vm.getlist()
-                }
-              })
-          },
-          onCancel: () => {
-            console.log('点击了取消')
-          }
-        })
+        title: '温馨提示',
+        content: `<p>是否将选中用户删除?</p>`,
+        onOk: () => {
+          uAxios.delete(`admins`, vm.userListId)
+            .then(res => {
+              if (res.code == 0) {
+                vm.$Message.success('操作成功!')
+                vm.page = 1
+                vm.list = []
+                vm.getlist()
+              }
+            })
+        },
+        onCancel: () => {
+          console.log('点击了取消')
+        }
+      })
     },
     handleSelectAll (status) {
       this.$refs.selection.selectAll(this.CheckboxValue)
     },
     batchFn () {
-      this.$Message.info('This is a test');
+      this.$Message.info('This is a test')
     },
     handlePage (num) { // 分页
       this.getlist(num)

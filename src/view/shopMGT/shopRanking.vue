@@ -55,96 +55,27 @@ export default {
         {
           title: '店长',
           key: 'created_at',
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.user) {
+              return h('span', {
+              }, params.row.user.name)
+            } else {
+              return h('span', '未获取')
+            }
+          }
         },
         {
           title: '营业额',
-          key: 'type',
+          key: 'turnover',
           align: 'center',
           editable: true
         },
         {
           title: '总课时',
-          key: 'type',
+          key: 'courses_count',
           align: 'center',
           editable: true
-        },
-        {
-          title: '操作',
-          key: 'id',
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'userDetail',
-                      query: {id: 12}
-                    })
-                  }
-                }
-              }, '查看'),
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'userDetail',
-                      query: {id: 12}
-                    })
-                  }
-                }
-              }, '编辑'),
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定标记为已处理吗？</p>`,
-                      onOk: () => {
-                        this.$Message.info('点击了确认')
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
-                  }
-                }
-              }, '删除'),
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定标记为已处理吗？</p>`,
-                      onOk: () => {
-                        this.$Message.info('点击了确认')
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
-                  }
-                }
-              }, '设置提成')
-            ])
-          }
         }
       ],
       information: [],
@@ -158,7 +89,7 @@ export default {
     gotoPage (title) {
       this.$router.push({
         name: title,
-        query: {id: '12'}
+        query: { id: '12' }
       })
     },
     handleSelectAll (status) {
@@ -173,19 +104,11 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`stores/ranking?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
             console.log(this.information)
           }

@@ -6,11 +6,11 @@
           <Card style="margin-bottom: 32px">
             <span>上课状态：</span>
             <Select v-model="SelectValue" style="width:200px;margin-right: 16px;">
-              <Option value="全部" label="全部"></Option>
-              <Option value="已开课" label="已开课"></Option>
-              <Option value="已完成" label="已完成"></Option>
-              <Option value="已取消" label="已取消"></Option>
-              <Option value="未完成" label="未完成"></Option>
+              <Option value="" label="全部"></Option>
+              <Option value="0" label="未开始"></Option>
+              <Option value="1" label="进行中"></Option>
+              <Option value="2" label="已完成"></Option>
+              <Option value="3" label="已取消"></Option>
             </Select>
             <span>搜索关键词：</span>
             <Input
@@ -29,14 +29,6 @@
           </Card>
           <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="reset('addAuthorizationUser')">导出</Button>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
-          <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @click="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
-            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
-              <Option value="启用" label="启用"></Option>
-              <Option value="禁用" label="禁用"></Option>
-            </Select>
-            <Button @click="batchFn()" >确定</Button>
-          </div>
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
                 style="margin-top:30px;margin-bottom:30px;"  show-elevator></Page>
         </TabPane>
@@ -52,7 +44,6 @@ import dropdown from '../components/dropdown'
 import Cookies from 'js-cookie'
 
 export default {
-  name: 'authorization',
   components: {
     dropdown: dropdown
   },
@@ -60,7 +51,7 @@ export default {
     return {
       beginDate: '', // 反馈时间
       CheckboxValue: false,
-      SelectValue: '全部',
+      SelectValue: '',
       search: '',
       searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
@@ -72,11 +63,10 @@ export default {
         //   align: 'center'
         // },
         {
-          title: '序号',
+          title: '预约ID',
           key: 'id',
           align: 'center',
-          width: 100,
-          editable: true
+          width: 100
         },
         {
           title: '预约人',
@@ -86,37 +76,37 @@ export default {
         },
         {
           title: '电话',
-          key: 'type',
+          key: 'mobile',
           align: 'center',
           editable: true
         },
         {
           title: '预约时间',
-          key: 'created_at',
+          key: 'booking_time',
           align: 'center',
           editable: true
         },
         {
           title: '预约门店',
-          key: 'type',
+          key: 'store_name',
           align: 'center',
           editable: true
         },
         {
           title: '预约课程',
-          key: 'type',
+          key: 'course_name',
           align: 'center',
           editable: true
         },
         {
           title: '教练',
-          key: 'type',
+          key: 'coach_name',
           align: 'center',
           editable: true
         },
         {
           title: '上课状态',
-          key: 'type',
+          key: 'status',
           align: 'center',
           editable: true
         },
@@ -135,7 +125,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'BookingDetail',
-                      query: {id: 12}
+                      query: { id: params.row.id }
                     })
                   }
                 }
@@ -164,17 +154,49 @@ export default {
         }
       ],
       information: [],
+      beginDate: [],
       loading: false
     }
   },
   methods: {
+    format (time, format) {
+      var t = new Date(time)
+      var tf = function (i) {
+        return (i < 10 ? '0' : '') + i
+      }
+      return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+          case 'yyyy':
+            return tf(t.getFullYear())
+            break
+          case 'MM':
+            return tf(t.getMonth() + 1)
+            break
+          case 'mm':
+            return tf(t.getMinutes())
+            break
+          case 'dd':
+            return tf(t.getDate())
+            break
+          case 'HH':
+            return tf(t.getHours())
+            break
+          case 'ss':
+            return tf(t.getSeconds())
+            break
+        }
+      })
+    },
     reset () {
-      this.$Message.info('This is a 重置')
+      this.beginDate = []
+      this.SelectValue = ''
+      this.searchKeyword = '' // 搜索
+      this.$Message.info('已重置')
     },
     gotoPage (title) {
       this.$router.push({
         name: title,
-        query: {id: '12'}
+        query: { id: '12' }
       })
     },
     handleSelectAll (status) {
@@ -189,19 +211,15 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      if (this.beginDate[0] && this.beginDate[1]) {
+        this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
+        this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
+      }
+      uAxios.get(`course/bookings?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&status=${this.SelectValue}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
             console.log(this.information)
           }

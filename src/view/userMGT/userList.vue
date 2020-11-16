@@ -24,9 +24,9 @@
                 </div>
           </Card>
           <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="reset('addAuthorizationUser')">导出</Button>
-          <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
+          <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border  @on-selection-change="handleSelect"></Table>
           <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @click="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
+            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
             <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
               <Option value="启用" label="启用"></Option>
               <Option value="禁用" label="禁用"></Option>
@@ -61,6 +61,7 @@ export default {
       searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
       id: '',
+      ids: [],
       orgColumns: [
         {
           type: 'selection',
@@ -91,13 +92,12 @@ export default {
           key: 'created_at',
           align: 'center',
           render: (h, params) => {
-            if(params.row.store){
+            if (params.row.store) {
               return h('span', {
               }, params.row.store.name)
-            }else{
+            } else {
               return h('span', '未获取')
             }
-
           }
         },
         {
@@ -131,7 +131,7 @@ export default {
                     }
                     uAxios.post(`users/${params.row.id}`, data)
                       .then(res => {
-                        if(res.code == 0){
+                        if (res.code == 0) {
                           this.$Message.success('操作成功!')
                         }
                       })
@@ -158,7 +158,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'userDetail',
-                      query: {id: 12}
+                      query: { id: 12 }
                     })
                   }
                 }
@@ -173,19 +173,27 @@ export default {
   },
   methods: {
     reset () {
-      this.$Message.info('This is a 重置');
+      this.$Message.info('This is a 重置')
+    },
+    handleSelect (selection) {
+      let ids = []
+      for (let item of selection) {
+        ids.push(item.id)
+      }
+      this.ids = ids
+      console.log(this.ids, 'asd')
     },
     gotoPage (title) {
       this.$router.push({
         name: title,
-        query: {id: '12'}
+        query: { id: '12' }
       })
     },
     handleSelectAll (status) {
-      this.$refs.selection.selectAll(status)
+      this.$refs.selection.selectAll(this.CheckboxValue)
     },
     batchFn () {
-      this.$Message.info('This is a test');
+      this.$Message.info('This is a test')
     },
     handlePage (num) { // 分页
       this.getlist(num)
