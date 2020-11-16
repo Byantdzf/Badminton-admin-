@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import store from '@/store'
 import iView from 'iview'
-import {getToken, canTurnTo, getLocalStorage} from '@/libs/util'
+import { getToken, canTurnTo, getLocalStorage } from '@/libs/util'
 
 Vue.use(Router)
 const router = new Router({
@@ -41,11 +41,11 @@ router.beforeEach((to, from, next) => {
     // console.log(access)
     // console.log(store.state.app.routersConfig)
     console.log(getLocalStorage('access').split(','))
-    if (canTurnTo(to.name, getLocalStorage('access').split(','), store.state.app.routersConfig)) {
-      next() // 有权限，可访问
-    } else {
-      next({replace: true, name: 'error_401'}) // 无权限，重定向到401页面}
-    }
+    // if (canTurnTo(to.name, getLocalStorage('access').split(','), store.state.app.routersConfig)) {
+    next() // 有权限，可访问
+    // } else {
+    //   next({replace: true, name: 'error_401'}) // 无权限，重定向到401页面}
+    // }
   }
 })
 

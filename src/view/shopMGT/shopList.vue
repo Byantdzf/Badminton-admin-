@@ -131,7 +131,7 @@ export default {
                 on: {
                   click: () => {
                     this.$router.push({
-                      name: 'editShopDetail',
+                      name: 'shopDetail',
                       query: { id: params.row.id }
                     })
                   }

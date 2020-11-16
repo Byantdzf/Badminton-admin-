@@ -92,6 +92,7 @@ export default {
   },
   data () {
     return {
+      userInfo: {},
       formValidate: {
         state: 'start', // 状态
         name: '',
@@ -447,7 +448,7 @@ export default {
           let result = res.data.data
           if (result.data) {
             self.information = result.data.map((item) => {
-              let {user} = item
+              let { user } = item
               user.adminId = item.id
               user.created_at = item.created_at
               user.sex = user.sex == 1 ? '男' : '女'

@@ -37,6 +37,9 @@
                   </Card>
                 </FormItem>
               </Card>
+              <Card title="门店提成记录" style="margin-top: 22px;">
+                <Table border :columns="columns" :data="push_money"></Table>
+              </Card>
             </Col>
           </Row>
         </Form>
@@ -44,45 +47,6 @@
     </Tabs>
     <Modal v-model="showMapModel" width="860" title="活动地址" @on-ok="ok">
       <Geolocation  @getLocation="getLocation"  @hideModal="hideModal" :setLocation="setLocation" ></Geolocation>
-    </Modal>
-<!--    新增规格-->
-    <Modal
-      v-model="modal"
-      title="新增规格"
-      @on-ok="ok"
-      @on-cancel="cancel">
-      <Form :model="formItem1" :label-width="80">
-        <FormItem label="规格名称：">
-          <Input v-model="formItem1.name" placeholder="请输入..." style="width:200px;"></Input>
-        </FormItem>
-        <FormItem label="库存：">
-          <Input v-model="formItem1.num" placeholder="请输入..." style="width:200px;"></Input>
-        </FormItem>
-        <FormItem label="销售价：">
-          <Input v-model="formItem1.price" placeholder="请输入..." style="width:200px;"></Input>
-        </FormItem>
-      </Form>
-    </Modal>
-<!--    新增课时-->
-    <Modal
-      v-model="modal1"
-      title="新增课时"
-      @on-ok="ok"
-      @on-cancel="cancel">
-      <Form :model="formItem2" :label-width="120">
-        <FormItem label="规格名称：">
-          <Input v-model="formItem2.name" placeholder="请输入..." style="width:200px;"></Input>
-        </FormItem>
-        <FormItem label="时间：">
-          <DatePicker type="datetimerange" placeholder="选择查询日期" style="width:200px;"></DatePicker>
-        </FormItem>
-        <FormItem label="有效期（天）：">
-          <Input v-model="formItem2.day" placeholder="请输入..." style="width:200px;"></Input>
-        </FormItem>
-        <FormItem label="上课人数：">
-          <Input v-model="formItem2.num" placeholder="请输入..." style="width:200px;"></Input>
-        </FormItem>
-      </Form>
     </Modal>
     <Button type="primary" @click="saveFn" style="margin-right: 12px;">保存</Button>
     <Button @click="getBack" style="margin: 22px 0">返回</Button>
@@ -113,13 +77,16 @@ export default {
       showMapModel: false,
       userList: [],
       poster: '',
+      shopDetail: {},
       setLocation: [],
+      push_money: [],
       title: '新增门店详情',
       filePath: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
       sizeList: [
         { title: '10次卡' },
         { title: '3次卡' }
       ],
+      id: '',
       modal: false,
       modal1: false,
       formItem1: {
@@ -135,67 +102,19 @@ export default {
       },
       columns: [
         {
-          title: '规格',
-          key: 'name',
-          align: 'center'
-        },
-        {
-          title: '库存',
-          key: 'num',
-          align: 'center'
-        },
-        {
-          title: '销售价',
-          key: 'price',
-          align: 'center'
-        }
-      ],
-      data: [
-        {
-          name: '10次卡',
-          num: 18,
-          price: '12.00'
-        },
-        {
-          name: '3次卡',
-          num: 12,
-          price: '4.00'
-        }
-      ],
-      columns1: [
-        {
-          title: '课时',
-          key: 'name',
-          align: 'center'
-        },
-        {
           title: '时间',
-          key: 'time',
+          key: 'created_at',
           align: 'center'
         },
         {
-          title: '有效期（天）',
-          key: 'day',
+          title: '提成金额（元）',
+          key: 'value',
           align: 'center'
         },
         {
-          title: '上课人数',
-          key: 'num',
+          title: '更新时间',
+          key: 'updated_at',
           align: 'center'
-        }
-      ],
-      data2: [
-        {
-          name: '第一课时',
-          num: 18,
-          day: '12',
-          time: '2020-10-12 8:00 ~ 2020-10-15 12:00'
-        },
-        {
-          name: '第二课时',
-          num: 12,
-          day: '12',
-          time: '2020-10-12 8:00 ~ 2020-10-15 12:00'
         }
       ],
       address: '',
@@ -223,10 +142,10 @@ export default {
           return this.$Message.error('你有信息项未填写，请先填写!')
         }
       }
-      uAxios.post(`stores`, vm.formItem)
+      uAxios.put(`stores/${this.id}`, vm.formItem)
         .then(res => {
           if (res.data.code == 0) {
-            this.$Message.success('创建成功!')
+            this.$Message.success('修改成功!')
             setTimeout(() => {
               this.$router.go(-1) // 返回上一层
             }, 800)
@@ -361,23 +280,14 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`stores/${this.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
-          if (result.data) {
-            self.information = result.data.map((item) => {
-              let { user } = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
-          }
+          self.address = `${result.province}${result.city}${result.dist}${result.address}`
+          self.formItem = result
+          self.push_money = result.push_money
           self.loading = false
+          console.log(self.formItem)
         })
     },
     handleSearch () {
@@ -386,6 +296,7 @@ export default {
   },
   mounted () {
     if (this.$route.query.id) {
+      this.id = this.$route.query.id
       this.getlist(1)
       this.title = '编辑门店详情'
     }

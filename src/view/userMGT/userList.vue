@@ -6,8 +6,9 @@
           <Card style="margin-bottom: 32px">
             <span>状态：</span>
             <Select v-model="SelectValue" style="width:200px;margin-right: 16px;">
-              <Option value="启用" label="启用"></Option>
-              <Option value="禁用" label="禁用"></Option>
+              <Option value="-1" label="全部"></Option>
+              <Option value="1" label="启用"></Option>
+              <Option value="0" label="禁用"></Option>
             </Select>
             <Input
               v-model="searchKeyword"
@@ -48,13 +49,12 @@ import dropdown from '../components/dropdown'
 import Cookies from 'js-cookie'
 
 export default {
-  name: 'authorization',
   components: {
     dropdown: dropdown
   },
   data () {
     return {
-      beginDate: '', // 反馈时间
+      beginDate: [], // 时间
       CheckboxValue: false,
       SelectValue: '',
       search: '',
@@ -158,7 +158,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'userDetail',
-                      query: { id: 12 }
+                      query: { id: params.row.id }
                     })
                   }
                 }
@@ -172,8 +172,38 @@ export default {
     }
   },
   methods: {
+    format (time, format) {
+      var t = new Date(time)
+      var tf = function (i) {
+        return (i < 10 ? '0' : '') + i
+      }
+      return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+          case 'yyyy':
+            return tf(t.getFullYear())
+            break
+          case 'MM':
+            return tf(t.getMonth() + 1)
+            break
+          case 'mm':
+            return tf(t.getMinutes())
+            break
+          case 'dd':
+            return tf(t.getDate())
+            break
+          case 'HH':
+            return tf(t.getHours())
+            break
+          case 'ss':
+            return tf(t.getSeconds())
+            break
+        }
+      })
+    },
     reset () {
-      this.$Message.info('This is a 重置')
+      this.beginDate = []
+      this.searchKeyword = '' // 搜索
+      this.$Message.info('已重置')
     },
     handleSelect (selection) {
       let ids = []
@@ -201,7 +231,11 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`users?page=${page}&keyword=${self.searchKeyword}`)
+      if (this.beginDate[0] && this.beginDate[1]) {
+        this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
+        this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
+      }
+      uAxios.get(`users?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&is_show=${this.SelectValue}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {

@@ -111,7 +111,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'evaluateDetail',
-                      query: {id: 12}
+                      query: { id: 12 }
                     })
                   }
                 }
@@ -207,7 +207,7 @@ export default {
     gotoPage (title) {
       this.$router.push({
         name: title,
-        query: {id: '12'}
+        query: { id: '12' }
       })
     },
     handleSelectAll (status) {
@@ -222,12 +222,12 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`evaluates?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
             self.information = result.data.map((item) => {
-              let {user} = item
+              let { user } = item
               user.adminId = item.id
               user.created_at = item.created_at
               user.sex = user.sex == 1 ? '男' : '女'

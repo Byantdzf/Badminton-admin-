@@ -49,7 +49,6 @@ export default {
   },
   data () {
     return {
-      beginDate: '', // 反馈时间
       CheckboxValue: false,
       SelectValue: '',
       search: '',
@@ -113,6 +112,7 @@ export default {
         {
           title: '操作',
           key: 'id',
+          width: 180,
           align: 'center',
           render: (h, params) => {
             return h('div', [
@@ -148,7 +148,7 @@ export default {
                     })
                   }
                 }
-              }, '取消')
+              }, '取消预约')
             ])
           }
         }

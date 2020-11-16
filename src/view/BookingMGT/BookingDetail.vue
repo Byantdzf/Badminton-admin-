@@ -6,80 +6,40 @@
           <Row :gutter="16">
             <Col span="12">
               <Card title="基本信息">
-                <FormItem label="头像：" prop="account">
-                  <img src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg"
-                       alt="" width="80rpx" style="margin: 12px 22px 0 -6px;border: 2px solid #f3f3f3;">
-                </FormItem>
-<!--                <FormItem label="用户ID" prop="account">-->
-<!--                  <span>121212</span>-->
+<!--                <FormItem label="头像：" prop="account">-->
+<!--                  <img :src="information.name"-->
+<!--                       alt="" width="80rpx" style="margin: 12px 22px 0 -6px;border: 2px solid #f3f3f3;">-->
 <!--                </FormItem>-->
                 <FormItem label="预约人" prop="account">
-                  <span>李宁</span>
+                  <span>{{ information.name }}</span>
                 </FormItem>
                 <FormItem label="电话" prop="account">
-                  <span>1271682678126</span>
+                  <span>{{ information.mobile }}</span>
                 </FormItem>
                 <FormItem label="预约时间" prop="account">
-                  <span>2020/12/12 13:00</span>
+                  <span>{{ information.booking_time }}</span>
                 </FormItem>
                 <FormItem label="预约门店" prop="account">
-                  <span>李宁店铺</span>
+                  <span>{{ information.store_name }}</span>
+                </FormItem>
+                <FormItem label="教练名称" prop="account">
+                  <span>{{ information.coach_name }}</span>
                 </FormItem>
                 <FormItem label="预约课程" prop="account">
-                  <span>XXX</span>
+                  <span>{{ information.course_name }}</span>
                 </FormItem>
                 <FormItem label="上课状态" prop="account">
-                  <span>已开课</span>
+                  <span>{{ information.status }}</span>
 <!--                  <span>已完成</span>-->
 <!--                  <span>已取消</span>-->
 <!--                  <span>未开课</span>-->
                 </FormItem>
-<!--                <FormItem label="最近登录时间" prop="account">-->
-<!--                  <span>2020/12/12 13:00</span>-->
-<!--                </FormItem>-->
               </Card>
             </Col>
-<!--            <Col span="6">-->
-<!--              <Card title="个人资料信息">-->
-<!--                <FormItem label="姓名" prop="account">-->
-<!--                  <span>小王</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="性别" prop="account">-->
-<!--                  <span>男</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="出生年月日" prop="account">-->
-<!--                  <span>1995-12-9</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="电话" prop="account">-->
-<!--                  <span>15707534403</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="用户状态" prop="account">-->
-<!--                  <span>禁用</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="预期收获" prop="account">-->
-<!--                  <span>增强抵抗力</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="正在培训课程" prop="account">-->
-<!--                  <span>培训班</span>-->
-<!--                </FormItem>-->
-<!--              </Card>-->
-<!--            </Col>-->
           </Row>
         </Form>
       </TabPane>
     </Tabs>
-<!--    <Row :gutter="20">-->
-<!--      <Col span="20">-->
-<!--        <Tabs style="margin: 22px 0;">-->
-<!--          <TabPane label="购买课程信息" name="course">-->
-<!--            <Table border :columns="columns" :data="data"></Table>-->
-<!--          </TabPane>-->
-<!--          <TabPane label="运动轨迹信息" name="exercise">-->
-<!--            <Table border :columns="columns2" :data="data2"></Table>-->
-<!--          </TabPane>-->
-<!--        </Tabs>-->
-<!--      </Col>-->
-<!--    </Row>-->
     <Button @click="getBack" style="margin: 22px 0">返回</Button>
   </Card>
 </template>
@@ -96,378 +56,35 @@ export default {
   },
   data () {
     return {
-      formValidate: {
-        state: 'start', // 状态
-        name: '',
-        mail: '',
-        role: '',
-        mobile: '',
-        account: '', // 账号
-        password: '', // 密码
-        confirmPassword: '', // 确认密码
-        desc: ''
-      },
-      indeterminate: true,
-      checkAll: false,
-      checkAllGroup: ['香蕉', '西瓜'],
-      columns: [
-        {
-          title: '课程ID',
-          key: 'name',
-          width: 150,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('Icon', {
-                props: {
-                  type: 'person'
-                }
-              }),
-              h('strong', '1212')
-            ])
-          }
-        },
-        {
-          title: '课程名称',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '课程图片',
-          width: 80,
-          render: (h, params) => {
-            return h('img', {
-              attrs: {
-                src: params.row.pic
-              },
-              style: {
-                width: '48px',
-                height: '48px',
-                marginTop: '6px',
-                border: '4px solid #f4f4f4'
-              },
-              on: {
-                click: () => {
-                  // let argu = {id: params.row.id}
-                  // this.$router.push({
-                  //   name: 'user_detail',
-                  //   params: argu
-                  // })
-                }
-              }
-            })
-          },
-          align: 'center'
-        },
-        {
-          width: 150,
-          title: '课程规格',
-          align: 'center',
-          key: 'specification'
-        },
-        {
-          width: 150,
-          title: '剩余次数',
-          align: 'center',
-          key: 'num'
-        },
-        {
-          width: 150,
-          title: '销售价（元）',
-          align: 'center',
-          key: 'price'
-        },
-        {
-          title: '购买类型',
-          align: 'center',
-          width: 150,
-          key: 'address'
-        },
-        {
-          title: '更新时间',
-          align: 'center',
-          width: 150,
-          key: 'time'
-        },
-        {
-          title: 'Action',
-          key: 'action',
-          width: 150,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('Button', {
-                props: {
-                  type: 'primary',
-                  size: 'small'
-                },
-                style: {
-                  marginRight: '5px'
-                },
-                on: {
-                  click: () => {
-                    this.show(params.index)
-                  }
-                }
-              }, '增加次数')
-            ])
-          }
-        }
-      ],
-      data: [
-        {
-          name: 'John Brown',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jim Green',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Joe Black',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '续费',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jon Snow',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        }
-      ],
-      columns2: [
-        {
-          title: '用户ID',
-          key: 'name',
-          width: 150,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('Icon', {
-                props: {
-                  type: 'person'
-                }
-              }),
-              h('strong', '1212')
-            ])
-          }
-        },
-        {
-          title: '用户名称',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '视频类型',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '视频标题',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '教练名称',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '评星等级',
-          align: 'center',
-          key: 'age'
-        },
-        {
-          title: '评论内容',
-          align: 'center',
-          width: 150,
-          key: 'address'
-        },
-        {
-          title: '发布时间',
-          align: 'center',
-          width: 150,
-          key: 'time'
-        },
-        {
-          title: 'Action',
-          key: 'action',
-          width: 150,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '5px'
-                },
-                on: {
-                  click: () => {
-                    this.show(params.index)
-                  }
-                }
-              }, '查看'),
-              h('span', {
-                style: {
-                  color: '#ed4014',
-                  marginRight: '12px'
-                },
-                on: {
-                  click: () => {
-                    this.show(params.index)
-                  }
-                }
-              }, '删除')
-            ])
-          }
-        }
-      ],
-      data2: [
-        {
-          name: 'John Brown',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jim Green',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Joe Black',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '续费',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jon Snow',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        }
-      ]
+      id: '',
+      information: {}
     }
   },
   methods: {
-    handleCheckAll () {
-      if (this.indeterminate) {
-        this.checkAll = false
-      } else {
-        this.checkAll = !this.checkAll
-      }
-      this.indeterminate = false
 
-      if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
-      } else {
-        this.checkAllGroup = []
-      }
-    },
-    checkAllGroupChange (data) {
-      if (data.length === 3) {
-        this.indeterminate = false
-        this.checkAll = true
-      } else if (data.length > 0) {
-        this.indeterminate = true
-        this.checkAll = false
-      } else {
-        this.indeterminate = false
-        this.checkAll = false
-      }
-    },
-    handleSubmit (name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.$Message.success('Success!')
-        } else {
-          this.$Message.error('Fail!')
-        }
-      })
-      console.log(this.formValidate)
-    },
     getBack () {
       this.$router.back(-1)
-    },
-    handleReset (name) {
-      this.$refs[name].resetFields()
-    },
-    // =========
-    handleSelectAll (status) {
-      this.$refs.selection.selectAll(status)
-    },
-    batchFn () {
-      this.$Message.info('This is a test')
-    },
-    handlePage (num) { // 分页
-      this.getlist(num)
     },
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`course/bookings/${this.id}`)
         .then(res => {
-          let result = res.data.data
+          let result = res.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
             console.log(this.information)
           }
           self.loading = false
         })
-    },
-    handleSearch () {
-      this.getlist(1)
     }
   },
   mounted () {
-    this.getlist(1)
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id
+      this.getlist(1)
+    }
     console.log(this.$route.query)
   }
 }

@@ -234,7 +234,7 @@ export const staticRouters = [
         path: 'financeList',
         icon: 'ios-contacts',
         meta: {
-          access: ['admin'],
+          access: [],
           hideInMenu: false,
           notCache: true,
           title: '流水系统汇总'
@@ -259,7 +259,7 @@ export const staticRouters = [
         path: 'courseList',
         icon: 'ios-rose',
         meta: {
-          access: ['admin'],
+          access: [],
           hideInMenu: false,
           notCache: true,
           title: '课程列表'
@@ -271,7 +271,7 @@ export const staticRouters = [
         path: 'courseClassList',
         icon: 'ios-pricetag',
         meta: {
-          access: ['admin'],
+          access: [],
           hideInMenu: false,
           notCache: true,
           title: '课程分类列表'
@@ -296,7 +296,7 @@ export const staticRouters = [
         path: 'motionTrailList',
         icon: 'ios-rose',
         meta: {
-          access: ['admin'],
+          access: [],
           hideInMenu: false,
           notCache: true,
           title: '运动轨迹列表'
@@ -391,11 +391,21 @@ export const staticRouters = [
         path: 'editShopDetail',
         name: 'editShopDetail',
         meta: {
-          title: '门店详情',
+          title: '编辑门店详情',
           hideInMenu: true,
           notCache: false
         },
         component: () => import('@/view/shopMGT/editShopDetail.vue'),
+      },
+      {
+        path: 'shopDetail',
+        name: 'shopDetail',
+        meta: {
+          title: '门店详情',
+          hideInMenu: true,
+          notCache: false
+        },
+        component: () => import('@/view/shopMGT/shopDetail.vue'),
       },
       {
         path: 'evaluateDetail',

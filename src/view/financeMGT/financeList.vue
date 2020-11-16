@@ -8,9 +8,9 @@
             <Col span="20">
               <span>支付方式：</span>
               <Select v-model="SelectValue" style="width:200px;margin-right: 20px;">
-                <Option value="全部" label="全部"></Option>
-                <Option value="微信" label="微信"></Option>
-                <Option value="现金支付" label="现金支付"></Option>
+                <Option value="" label="全部"></Option>
+                <Option value="wechat" label="微信支付"></Option>
+                <Option value="cash" label="现金支付"></Option>
               </Select>
               <span>搜索关键词：</span>
               <Input
@@ -66,7 +66,6 @@ import dropdown from '../components/dropdown'
 // import Cookies from 'js-cookie'
 
 export default {
-  name: 'authorization',
   components: {
     dropdown: dropdown,
     countUp: countUp
@@ -76,28 +75,28 @@ export default {
       countList: [
         {
           text: '历史总收入（元）',
-          endVal: 200.00,
+          endVal: 0,
           name: 'idName1'
         },
         {
           text: '昨日总收入（元）',
-          endVal: 12.00,
+          endVal: 0,
           name: 'idName2'
         },
         {
           text: '上周总收入（元）',
-          endVal: 52.00,
+          endVal: 0,
           name: 'idName3'
         },
         {
           text: '上月总收入（元）',
-          endVal: 68.00,
+          endVal: 0,
           name: 'idName4'
         }
       ],
-      beginDate: '', // 反馈时间
+      beginDate: [], // 反馈时间
       CheckboxValue: false,
-      SelectValue: '全部',
+      SelectValue: '',
       search: '',
       searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
@@ -105,7 +104,7 @@ export default {
       orgColumns: [
         {
           title: '流水号',
-          key: 'id',
+          key: 'order_no',
           align: 'center',
           width: 100
         },
@@ -113,28 +112,41 @@ export default {
           title: '昵称',
           key: 'id',
           align: 'center',
-          width: 100
+          render: (h, params) => {
+            if (params.row.user) {
+              return h('span', {
+              }, params.row.user.name)
+            } else {
+              return h('span', '未获取')
+            }
+          }
         },
         {
-          title: '类型',
-          key: 'name',
-          align: 'center',
-          editable: true
+          title: '价格',
+          key: 'price',
+          align: 'center'
         },
         {
-          title: '金额',
-          key: 'type',
+          title: '实付价格',
+          key: 'real_price',
           align: 'center'
         },
         {
           title: '关联订单',
-          key: 'created_at',
+          key: 'trade_no',
           align: 'center'
         },
         {
-          title: '支付方式',
-          key: 'type',
-          align: 'center'
+          title: '类型',
+          key: 'pay_type',
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.pay_type == 'wechat') {
+              return h('span', '微信支付')
+            } else {
+              return h('span', '现金支付')
+            }
+          }
         },
         {
           title: '到账方式',
@@ -143,7 +155,7 @@ export default {
         },
         {
           title: '发生时间',
-          key: 'type',
+          key: 'updated_at',
           align: 'center'
         }
       ],
@@ -152,13 +164,44 @@ export default {
     }
   },
   methods: {
+    format (time, format) {
+      var t = new Date(time)
+      var tf = function (i) {
+        return (i < 10 ? '0' : '') + i
+      }
+      return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+          case 'yyyy':
+            return tf(t.getFullYear())
+            break
+          case 'MM':
+            return tf(t.getMonth() + 1)
+            break
+          case 'mm':
+            return tf(t.getMinutes())
+            break
+          case 'dd':
+            return tf(t.getDate())
+            break
+          case 'HH':
+            return tf(t.getHours())
+            break
+          case 'ss':
+            return tf(t.getSeconds())
+            break
+        }
+      })
+    },
     reset () {
-      this.$Message.info('This is a 重置')
+      this.beginDate = []
+      this.SelectValue = ''
+      this.searchKeyword = '' // 搜索
+      this.$Message.info('已重置')
     },
     gotoPage (title) {
       this.$router.push({
         name: title,
-        query: {id: '12'}
+        query: { id: '12' }
       })
     },
     handleSelectAll (status) {
@@ -173,20 +216,21 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      if (this.beginDate[0] && this.beginDate[1]) {
+        this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
+        this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
+      }
+      uAxios.get(`running/account?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&pay_type=${this.SelectValue}`)
         .then(res => {
           let result = res.data.data
-          if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
+          self.countList[0].endVal = result.total_income
+          self.countList[1].endVal = result.day_income
+          self.countList[2].endVal = result.week_income
+          self.countList[3].endVal = result.month_income
+          console.log(result)
+          if (result.orders.data) {
+            self.information = result.orders.data
+            self.orgTotal = result.orders.total
             console.log(this.information)
           }
           self.loading = false
