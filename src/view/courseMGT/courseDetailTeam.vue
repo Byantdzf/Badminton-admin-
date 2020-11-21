@@ -7,27 +7,28 @@
             <Col span="8">
               <Card title="基础信息">
                 <FormItem label="课程类型：" prop="account">
-                  <span>团课</span>
+                  <span v-if="information.type == 'league'">团课</span>
+                  <span v-if="information.type == 'online'">网课</span>
+                  <span v-if="information.type == 'trial'">体验课</span>
                 </FormItem>
                 <FormItem label="课程名称：" prop="account">
-                  <span>Mamba 第一课</span>
-
+                  <span>{{information.name}}</span>
                 </FormItem>
-                <FormItem label="所属球场：" prop="account">
-                  <span>洛杉矶球场</span>
+                <FormItem label="所属门店：" prop="account">
+                  <span>{{information.store_id}}</span>
                 </FormItem>
                 <FormItem label="所属教练：" prop="account">
-                  <span>mamba</span>
+                  <span>{{information.coach_user_id}}</span>
                 </FormItem>
                 <FormItem label="课程图片：" prop="account">
-                  <img src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg" alt="" width="140">
+                  <img :src="information.pic" alt="" width="140">
                 </FormItem>
                 <FormItem label="课程详请信息：" prop="account">
-                  <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</span>
+                  <span v-html="information.detail"></span>
                 </FormItem>
-                <FormItem label="状态" prop="account">
-                  <span>上架</span>/
-                  <span>下架</span>
+                <FormItem label="状态：" prop="account">
+                  <span v-if="information.is_show == '1'">上架</span>
+                  <span v-else>下架</span>
                 </FormItem>
               </Card>
               <Col span="10">
@@ -48,47 +49,10 @@
                 <Table border :columns="columns1" :data="data"></Table>
               </Card>
             </Col>
-            <!--            <Col span="6">-->
-            <!--              <Card title="个人资料信息">-->
-            <!--                <FormItem label="姓名" prop="account">-->
-            <!--                  <span>小王</span>-->
-            <!--                </FormItem>-->
-            <!--                <FormItem label="性别" prop="account">-->
-            <!--                  <span>男</span>-->
-            <!--                </FormItem>-->
-            <!--                <FormItem label="出生年月日" prop="account">-->
-            <!--                  <span>1995-12-9</span>-->
-            <!--                </FormItem>-->
-            <!--                <FormItem label="电话" prop="account">-->
-            <!--                  <span>15707534403</span>-->
-            <!--                </FormItem>-->
-            <!--                <FormItem label="用户状态" prop="account">-->
-            <!--                  <span>禁用</span>-->
-            <!--                </FormItem>-->
-            <!--                <FormItem label="预期收获" prop="account">-->
-            <!--                  <span>增强抵抗力</span>-->
-            <!--                </FormItem>-->
-            <!--                <FormItem label="正在培训课程" prop="account">-->
-            <!--                  <span>培训班</span>-->
-            <!--                </FormItem>-->
-            <!--              </Card>-->
-            <!--            </Col>-->
           </Row>
         </Form>
       </TabPane>
     </Tabs>
-    <!--    <Row :gutter="20">-->
-    <!--      <Col span="20">-->
-    <!--        <Tabs style="margin: 22px 0;">-->
-    <!--          <TabPane label="购买课程信息" name="course">-->
-    <!--            <Table border :columns="columns" :data="data"></Table>-->
-    <!--          </TabPane>-->
-    <!--          <TabPane label="运动轨迹信息" name="exercise">-->
-    <!--            <Table border :columns="columns2" :data="data2"></Table>-->
-    <!--          </TabPane>-->
-    <!--        </Tabs>-->
-    <!--      </Col>-->
-    <!--    </Row>-->
     <Button @click="getBack" style="margin: 22px 0">返回</Button>
   </Card>
 </template>
@@ -105,20 +69,10 @@ export default {
   },
   data () {
     return {
-      formValidate: {
-        state: 'start', // 状态
-        name: '',
-        mail: '',
-        role: '',
-        mobile: '',
-        account: '', // 账号
-        password: '', // 密码
-        confirmPassword: '', // 确认密码
-        desc: ''
-      },
+      id: '',
       indeterminate: true,
       checkAll: false,
-      checkAllGroup: ['香蕉', '西瓜'],
+      information: [],
       columns: [
         {
           title: '规格',
@@ -282,20 +236,11 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`courses/${self.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
-          let result = res.data.data
+          let result = res.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
+            self.information = result.data
             console.log(this.information)
           }
           self.loading = false
@@ -306,7 +251,10 @@ export default {
     }
   },
   mounted () {
-    this.getlist(1)
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id
+      this.getlist(1)
+    }
     console.log(this.$route.query)
   }
 }

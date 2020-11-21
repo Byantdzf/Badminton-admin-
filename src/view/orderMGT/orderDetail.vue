@@ -7,81 +7,43 @@
             <Col span="8">
               <Card title="订单信息">
                 <FormItem label="订单编号" prop="account">
-                  <span>1271682678126</span>
+                  <span>{{ formValidate.trade_no }}</span>
                 </FormItem>
                 <FormItem label="下单时间" prop="account">
-                  <span>2020/12/12 13:00</span>
+                  <span>{{ formValidate.created_at }}</span>
                 </FormItem>
                 <FormItem label="支付时间" prop="account">
-                  <span>2020/12/12 13:00</span>
+                  <span>{{ formValidate.updated_at }}</span>
                 </FormItem>
                 <FormItem label="支付方式" prop="account">
-                  <span>微信支付</span>/
-                  <span>现金支付</span>
+                  <span v-if="formValidate.pay_type == 'cash'">微信支付</span>
+                  <span v-else>现金支付</span>
                 </FormItem>
                 <FormItem label="课程金额" prop="account">
-                  <span>￥190.00</span>
+                  <span>￥{{ formValidate.trade_no }}</span>
                 </FormItem>
                 <FormItem label="用户昵称" prop="account">
-                  <span>XXX</span>
+                  <span>{{ formValidate.user?formValidate.user.name:"" }}</span>
                 </FormItem>
                 <FormItem label="购买类型" prop="account">
-                  <span>首次购买</span>/
-                  <span>续卡</span>
+                  <span>{{ formValidate.status }}</span>
                 </FormItem>
               </Card>
               <Card title="提成信息" style="margin-top: 16px;">
-                <FormItem label="提成金额：95.00" prop="account">
-                  <span>1271682678126</span>
+                <FormItem label="提成金额：" prop="account">
+                  <span>{{ formValidate.push_money }}</span>
                 </FormItem>
               </Card>
             </Col>
             <Col span="14">
               <Card title="课程信息">
-                <Table border :columns="columns" :data="data"></Table>
+                <Table border :columns="columns" :data="course"></Table>
               </Card>
             </Col>
-<!--            <Col span="6">-->
-<!--              <Card title="个人资料信息">-->
-<!--                <FormItem label="姓名" prop="account">-->
-<!--                  <span>小王</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="性别" prop="account">-->
-<!--                  <span>男</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="出生年月日" prop="account">-->
-<!--                  <span>1995-12-9</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="电话" prop="account">-->
-<!--                  <span>15707534403</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="用户状态" prop="account">-->
-<!--                  <span>禁用</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="预期收获" prop="account">-->
-<!--                  <span>增强抵抗力</span>-->
-<!--                </FormItem>-->
-<!--                <FormItem label="正在培训课程" prop="account">-->
-<!--                  <span>培训班</span>-->
-<!--                </FormItem>-->
-<!--              </Card>-->
-<!--            </Col>-->
           </Row>
         </Form>
       </TabPane>
     </Tabs>
-<!--    <Row :gutter="20">-->
-<!--      <Col span="20">-->
-<!--        <Tabs style="margin: 22px 0;">-->
-<!--          <TabPane label="购买课程信息" name="course">-->
-<!--            <Table border :columns="columns" :data="data"></Table>-->
-<!--          </TabPane>-->
-<!--          <TabPane label="运动轨迹信息" name="exercise">-->
-<!--            <Table border :columns="columns2" :data="data2"></Table>-->
-<!--          </TabPane>-->
-<!--        </Tabs>-->
-<!--      </Col>-->
-<!--    </Row>-->
     <Button @click="getBack" style="margin: 22px 0">返回</Button>
   </Card>
 </template>
@@ -98,51 +60,29 @@ export default {
   },
   data () {
     return {
-      formValidate: {
-        state: 'start', // 状态
-        name: '',
-        mail: '',
-        role: '',
-        mobile: '',
-        account: '', // 账号
-        password: '', // 密码
-        confirmPassword: '', // 确认密码
-        desc: ''
-      },
+      formValidate: {},
+      course: [],
+      user: {},
+      id: '',
       indeterminate: true,
       checkAll: false,
-      checkAllGroup: ['香蕉', '西瓜'],
       columns: [
         {
           title: '课程名称',
           key: 'name',
-          width: 150,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('Icon', {
-                props: {
-                  type: 'person'
-                }
-              }),
-              h('strong', 'XXX')
-            ])
-          }
+          align: 'center'
         },
         {
-          // width: 150,
           title: '课程规格',
           align: 'center',
           key: 'specification'
         },
         {
-          // width: 150,
           title: '数量',
           align: 'center',
           key: 'num'
         },
         {
-          // width: 150,
           title: '单价',
           align: 'center',
           key: 'totalPrice'
@@ -150,85 +90,12 @@ export default {
         {
           title: '合计',
           align: 'center',
-          // width: 150,
           key: 'totalPrice'
-        }
-      ],
-      data: [
-        {
-          name: 'John Brown',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56',
-          totalPrice: '￥190.00'
-        },
-        {
-          name: 'Jim Green',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56',
-          totalPrice: '￥190.00'
-        },
-        {
-          name: 'Joe Black',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '续费',
-          time: '2020-08-12 12:56',
-          totalPrice: '￥190.00'
-        },
-        {
-          name: 'Jon Snow',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56',
-          totalPrice: '￥190.00'
         }
       ]
     }
   },
   methods: {
-    handleCheckAll () {
-      if (this.indeterminate) {
-        this.checkAll = false
-      } else {
-        this.checkAll = !this.checkAll
-      }
-      this.indeterminate = false
-
-      if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
-      } else {
-        this.checkAllGroup = []
-      }
-    },
-    checkAllGroupChange (data) {
-      if (data.length === 3) {
-        this.indeterminate = false
-        this.checkAll = true
-      } else if (data.length > 0) {
-        this.indeterminate = true
-        this.checkAll = false
-      } else {
-        this.indeterminate = false
-        this.checkAll = false
-      }
-    },
     handleSubmit (name) {
       this.$refs[name].validate((valid) => {
         if (valid) {
@@ -258,19 +125,15 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`orders/${self.id}?page=${page}`)
         .then(res => {
           let result = res.data.data
+          this.formValidate = result
+          this.course.push(result.course)
+          this.user = result.user
+          console.log(result)
+          console.log(this.formValidate, this.course, this.user)
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
             self.orgTotal = result.total
             console.log(this.information)
           }
@@ -282,7 +145,10 @@ export default {
     }
   },
   mounted () {
-    this.getlist(1)
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id
+      this.getlist(1)
+    }
     console.log(this.$route.query)
   }
 }

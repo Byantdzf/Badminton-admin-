@@ -149,11 +149,6 @@ export default {
           }
         },
         {
-          title: '到账方式',
-          key: 'type',
-          align: 'center'
-        },
-        {
           title: '发生时间',
           key: 'updated_at',
           align: 'center'

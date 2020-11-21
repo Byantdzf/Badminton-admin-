@@ -7,10 +7,10 @@
             <Col span="8">
               <Card title="基础信息">
                 <FormItem label="课程名称：" prop="account">
-                  <span>Mamba 第一课</span>
+                  <span>{{information.name}}</span>
                 </FormItem>
                 <FormItem label="所属分类：" prop="account">
-                  <span>羽毛球</span>
+                  <span>{{information.name}}</span>
                 </FormItem>
                 <FormItem label="课程视频：" prop="account">
                   <div class='videoStyle'>
@@ -22,7 +22,7 @@
                   </div>
                 </FormItem>
                 <FormItem label="课程要点：" prop="account">
-                  <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</span>
+                  <span v-html="information.detail"></span>
                 </FormItem>
               </Card>
             </Col>
@@ -46,6 +46,7 @@ export default {
   },
   data () {
     return {
+      information: {},
       playerOptions: {
         playbackRates: [0.5, 1.0, 1.5, 2.0], // 可选的播放速度
         autoplay: false, // 如果为true,浏览器准备好时开始回放。
@@ -57,7 +58,7 @@ export default {
         fluid: true, // 当true时，Video.js player将拥有流体大小。换句话说，它将按比例缩放以适应其容器。
         sources: [{
           type: 'video/mp4', // 类型
-          src: 'https://image.ufutx.com/video/1471212834390.mp4' // url地址
+          src: '' // url地址
         }],
         poster: '', // 封面地址
         notSupportedMessage: '此视频暂无法播放，请稍后再试', // 允许覆盖Video.js无法播放媒体源时显示的默认信息。
@@ -189,43 +190,12 @@ export default {
       ]
     }
   },
+  computed: {
+    player () {
+      return this.$refs.videoPlayer.player
+    }
+  },
   methods: {
-    handleCheckAll () {
-      if (this.indeterminate) {
-        this.checkAll = false
-      } else {
-        this.checkAll = !this.checkAll
-      }
-      this.indeterminate = false
-
-      if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
-      } else {
-        this.checkAllGroup = []
-      }
-    },
-    checkAllGroupChange (data) {
-      if (data.length === 3) {
-        this.indeterminate = false
-        this.checkAll = true
-      } else if (data.length > 0) {
-        this.indeterminate = true
-        this.checkAll = false
-      } else {
-        this.indeterminate = false
-        this.checkAll = false
-      }
-    },
-    handleSubmit (name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.$Message.success('Success!')
-        } else {
-          this.$Message.error('Fail!')
-        }
-      })
-      console.log(this.formValidate)
-    },
     getBack () {
       this.$router.back(-1)
     },
@@ -245,20 +215,12 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`courses/${self.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
-          let result = res.data.data
+          let result = res.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
+            self.information = result.data
+            self.playerOptions.sources[0].src = result.data.video_id
             console.log(this.information)
           }
           self.loading = false
@@ -269,7 +231,10 @@ export default {
     }
   },
   mounted () {
-    this.getlist(1)
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id
+      this.getlist(1)
+    }
     console.log(this.$route.query)
   }
 }
