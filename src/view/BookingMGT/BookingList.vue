@@ -24,10 +24,11 @@
             </p>
             <div style="margin-top: 22px;">
                     <Button type="warning" icon="ios-search" style="margin-left: 12px;" @click="handleSearch">搜索</Button>
-                    <Button type="primary" style="margin-left: 12px; " @click="reset('addAuthorizationUser')">重置</Button>
+                    <Button type="primary" style="margin-left: 12px; " @click="reset()">重置</Button>
                 </div>
           </Card>
-          <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="reset('addAuthorizationUser')">导出</Button>
+<!--          <a href='/api/admin/export/orders' download="报表.xlsx">导 出</a>-->
+          <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="exportFn()">导出</Button>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
                 style="margin-top:30px;margin-bottom:30px;"  show-elevator></Page>
@@ -140,7 +141,7 @@ export default {
                       title: '温馨提示',
                       content: `<p>你确定取消该预约吗？</p>`,
                       onOk: () => {
-                        this.$Message.info('点击了确认')
+                        this.cancelFn(params.index)
                       },
                       onCancel: () => {
                         console.log('点击了取消')
@@ -160,6 +161,7 @@ export default {
   },
   methods: {
     format (time, format) {
+      if (!time) return ''
       var t = new Date(time)
       var tf = function (i) {
         return (i < 10 ? '0' : '') + i
@@ -186,6 +188,21 @@ export default {
             break
         }
       })
+    },
+    exportFn () { // 导出数据
+      window.open(`api/admin/export/course/bookings`)
+    },
+    cancelFn (index) { // 取消预约
+      let {id} = this.information[index]
+      uAxios.post(`cancel/course/bookings/${id}`)
+        .then(res => {
+          let result = res.data.data
+          this.information.splice(index,1)
+          console.log(result)
+          if (result) {
+            this.$Message.info('已取消')
+          }
+        })
     },
     reset () {
       this.beginDate = []
@@ -215,7 +232,7 @@ export default {
         this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
         this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
       }
-      uAxios.get(`course/bookings?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&status=${this.SelectValue}`)
+      uAxios.get(`course/bookings?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&status=${this.SelectValue?this.SelectValue:''}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {

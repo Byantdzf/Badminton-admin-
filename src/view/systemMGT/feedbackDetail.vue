@@ -2,32 +2,39 @@
   <Card>
     <Form ref="formValidate" :model="formValidate" :label-width="80">
       <FormItem label="启用状态：" prop="state">
-        <span>未处理</span>
+        <span v-if="formValidate.status == 1">已处理</span>
+        <span v-else>未处理</span>
       </FormItem>
       <FormItem label="用户ID：" >
-        <span>121212</span>
+        <span>{{formValidate.user.id}}</span>
       </FormItem>
       <FormItem label="用户昵称：" >
-        <span>小林</span>
+        <span>{{formValidate.user.name}}</span>
+      </FormItem>
+      <FormItem label="联系电话：" >
+        <span>{{formValidate.user.mobile}}</span>
       </FormItem>
       <FormItem label="反馈时间：" >
-        <span>2020-09-12 12:12</span>
+        <span>{{formValidate.updated_at}}</span>
       </FormItem>
       <FormItem label="反馈内容：">
-        <span>交友很好！！！</span>
-        <div style="">
-          <img :src="item" alt="" width="80rpx" style="margin: 12px 22px 0 -6px;border: 2px solid #f3f3f3;"
-               @click="showModal(index)" v-for="(item,index) in Photos"/>
-        </div>
+        <span>{{formValidate.content}}</span>
+<!--        <div style="">-->
+<!--          <img :src="item" alt="" width="80rpx" style="margin: 12px 22px 0 -6px;border: 2px solid #f3f3f3;"-->
+<!--               @click="showModal(index)" v-for="(item,index) in Photos"/>-->
+<!--        </div>-->
       </FormItem>
-      <FormItem label="处理人：" >
-        <span>莫夏普</span>
+      <FormItem label="处理人：" v-if="formValidate.admin_id">
+        <span>暂无数据</span>
       </FormItem>
-      <FormItem label="处理时间：" >
-        <span>2020-09-12 12:12</span>
+      <FormItem label="处理人ID：" v-if="formValidate.admin_id">
+        <span>{{formValidate.admin_id}}</span>
+      </FormItem>
+      <FormItem label="处理时间：" v-if="formValidate.admin_id">
+        <span>{{formValidate.deal_time}}</span>
       </FormItem>
       <FormItem>
-        <Button type="primary" @click="handleSubmit('formValidate')">标记为已处理</Button>
+        <Button  v-if="formValidate.status != 1" type="primary" @click="handleSubmit('formValidate')">标记为已处理</Button>
         <Button @click="getBack" style="margin-left: 8px">返回</Button>
       </FormItem>
     </Form>
@@ -55,17 +62,8 @@ export default {
   },
   data () {
     return {
-      formValidate: {
-        state: 'start', // 状态
-        name: '',
-        mail: '',
-        role: '',
-        mobile: '',
-        account: '', // 账号
-        password: '', // 密码
-        confirmPassword: '', // 确认密码
-        desc: ''
-      },
+      formValidate: {},
+      id: '',
       previewPic: '', // 预览照片
       modal: false,
       Photos: ['https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3482753663,1816494568&fm=26&gp=0.jpg',
@@ -110,14 +108,21 @@ export default {
       }
     },
     handleSubmit (name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.$Message.success('Success!')
-        } else {
-          this.$Message.error('Fail!')
+      this.$Modal.confirm({
+        title: '温馨提示',
+        content: `<p>你确定标记为已处理吗？</p>`,
+        onOk: () => {
+          uAxios.post(`deal/feedback/logs/${this.id}`)
+            .then(res => {
+              this.$Message.info('点击了确认')
+              this.getlist(1)
+            })
+        },
+        onCancel: () => {
+          console.log('点击了取消')
         }
       })
-      console.log(this.formValidate)
+
     },
     getBack () {
       this.$router.back(-1)
@@ -138,21 +143,12 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`feedback/logs/${this.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
-          let result = res.data.data
+          let result = res.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
+            console.log(result.data)
+            this.formValidate = result.data
           }
           self.loading = false
         })
@@ -162,6 +158,10 @@ export default {
     }
   },
   mounted () {
+    let id = this.$route.query.id
+    if (id) {
+      this.id = id
+    }
     this.getlist(1)
     console.log(this.$route.query)
   }

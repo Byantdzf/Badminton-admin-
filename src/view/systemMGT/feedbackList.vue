@@ -6,8 +6,9 @@
           <Card style="margin-bottom: 32px">
             <span>状态：</span>
             <Select v-model="SelectValue" style="width:200px;margin-right: 16px;">
-              <Option value="已处理" label="已处理"></Option>
-              <Option value="未处理" label="未处理"></Option>
+              <Option value="-1" label="全部"></Option>
+              <Option value="1" label="已处理"></Option>
+              <Option value="0" label="未处理"></Option>
             </Select>
             <Input
               v-model="searchKeyword"
@@ -24,14 +25,14 @@
                 </div>
           </Card>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border @on-selection-change="handleSelect"></Table>
-          <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
-            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
-              <Option value="启用" label="启用"></Option>
-              <Option value="禁用" label="禁用"></Option>
-            </Select>
-            <Button @click="batchFn()" >确定</Button>
-          </div>
+<!--          <div style="margin-top:16px;">-->
+<!--            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>-->
+<!--            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">-->
+<!--              <Option value="启用" label="启用"></Option>-->
+<!--              <Option value="禁用" label="禁用"></Option>-->
+<!--            </Select>-->
+<!--            <Button @click="batchFn()" >确定</Button>-->
+<!--          </div>-->
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
                 style="margin-top:30px;margin-bottom:30px;"  show-elevator></Page>
         </TabPane>
@@ -47,7 +48,6 @@ import dropdown from '../components/dropdown'
 import Cookies from 'js-cookie'
 
 export default {
-  name: 'authorization',
   components: {
     dropdown: dropdown
   },
@@ -62,11 +62,11 @@ export default {
       id: '',
       ids: [],
       orgColumns: [
-        {
-          type: 'selection',
-          width: 60,
-          align: 'center'
-        },
+        // {
+        //   type: 'selection',
+        //   width: 60,
+        //   align: 'center'
+        // },
         {
           title: '序号',
           key: 'index',
@@ -112,7 +112,7 @@ export default {
           key: 'status',
           align: 'center',
           render: (h, params) => {
-            if (params.row.status) {
+            if (params.row.status == 1) {
               return h('span', {
               }, '已处理')
             } else {
@@ -121,13 +121,13 @@ export default {
           }
         },
         {
-          title: '处理人',
+          title: '处理人ID',
           key: 'type',
           align: 'center',
           render: (h, params) => {
             if (params.row.admin_id) {
               return h('span', {
-              }, '接口未给')
+              }, params.row.admin_id)
             } else {
               return h('span', '未处理')
             }
@@ -163,7 +163,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'feedbackDetail',
-                      query: { id: 12 }
+                      query: { id: params.row.id }
                     })
                   }
                 }
@@ -181,7 +181,7 @@ export default {
                       title: '温馨提示',
                       content: `<p>你确定标记为已处理吗？</p>`,
                       onOk: () => {
-                        this.$Message.info('点击了确认')
+                        this.disposeFn(params.index)
                       },
                       onCancel: () => {
                         console.log('点击了取消')
@@ -199,6 +199,35 @@ export default {
     }
   },
   methods: {
+    format (time, format) {
+      if (!time) return ''
+      var t = new Date(time)
+      var tf = function (i) {
+        return (i < 10 ? '0' : '') + i
+      }
+      return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+          case 'yyyy':
+            return tf(t.getFullYear())
+            break
+          case 'MM':
+            return tf(t.getMonth() + 1)
+            break
+          case 'mm':
+            return tf(t.getMinutes())
+            break
+          case 'dd':
+            return tf(t.getDate())
+            break
+          case 'HH':
+            return tf(t.getHours())
+            break
+          case 'ss':
+            return tf(t.getSeconds())
+            break
+        }
+      })
+    },
     handleSelect (selection) {
       let ids = []
       for (let item of selection) {
@@ -225,10 +254,24 @@ export default {
     handlePage (num) { // 分页
       this.getlist(num)
     },
+    disposeFn (index) { // 标记方法
+      console.log(this.information[index].id);
+      let {id} = this.information[index]
+      uAxios.post(`deal/feedback/logs/${id}`)
+        .then(res => {
+          // let result = res.data
+          this.$Message.info('点击了确认')
+          this.getlist(1)
+        })
+    },
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`feedback/logs?page=${page}&keyword=${self.searchKeyword}`)
+      if (this.beginDate[0] && this.beginDate[1]) {
+        this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
+        this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
+      }
+      uAxios.get(`feedback/logs?page=${page}&keyword=${self.searchKeyword}&status=${self.SelectValue}&start_time=${this.beginDate[0] ? this.beginDate[0] : ''}&end_time=${this.beginDate[1] ? this.beginDate[1] : ''}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {

@@ -9,13 +9,13 @@
               <Card title="视频信息" style="overflow: hidden;">
                 <Col span="3">
                   <div
-                    style="background-image: url('https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg')"
-                    class="photo"></div>
+                    :style="{backgroundImage: 'url(' + commentable.user.photo + ')'}"
+                     class="photo"></div>
                 </Col>
                 <Col span="14">
-                  <p style="margin-top: 12px;">mamba</p>
-                  <p style="margin-top: 12px;">这里是视频标题</p>
-                  <p style="margin-top: 12px;">发布时间： 2020/10/10 14:09</p>
+                  <p style="margin-top: 12px;">{{commentable.user.name}}</p>
+                  <p style="margin-top: 12px;">{{commentable.name}}</p>
+                  <p style="margin-top: 12px;">发布时间： {{commentable.updated_at}}</p>
                 </Col>
                 <Col span="14" offset="1">
                   <div class='videoStyle'>
@@ -30,18 +30,18 @@
               <Card title="评价信息" style="margin-top: 24px;overflow: hidden;">
                 <Col span="3">
                   <div
-                    style="background-image: url('https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg')"
+                    :style="{backgroundImage: 'url(' + commented.photo + ')'}"
                     class="photo"></div>
                 </Col>
                 <Col span="20">
-                  <p style="margin-top: 12px;">mamba
-                    <Rate allow-half v-model="valueHalf" style="float: right"/>
+                  <p style="margin-top: 12px;">{{commented.name}}
+                    <Rate allow-half v-model="commented.rate" style="float: right"/>
                   </p>
-                  <p style="margin-top: 12px;">发布时间： 2020/10/10 14:09</p>
+                  <p style="margin-top: 12px;">发布时间： {{information.updated_at}}</p>
 
                 </Col>
                 <Col span="20">
-                  <p style="margin-top: 12px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</p>
+                  <p style="margin-top: 12px;">{{commentable.comment}}</p>
                 </Col>
                 <Col span="22">
                   <Button type="error" @click="handleSubmit('formValidate')">删除</Button>
@@ -80,7 +80,7 @@ export default {
         fluid: true, // 当true时，Video.js player将拥有流体大小。换句话说，它将按比例缩放以适应其容器。
         sources: [{
           type: 'video/mp4', // 类型
-          src: 'https://image.ufutx.com/video/1471212834390.mp4' // url地址
+          src: '' // url地址
         }],
         poster: '', // 封面地址
         notSupportedMessage: '此视频暂无法播放，请稍后再试', // 允许覆盖Video.js无法播放媒体源时显示的默认信息。
@@ -91,6 +91,8 @@ export default {
           fullscreenToggle: true // 是否显示全屏按钮
         }
       },
+      commentable: {},
+      commented: {},
       formValidate: {
         state: 'start', // 状态
         name: '',
@@ -102,6 +104,7 @@ export default {
         confirmPassword: '', // 确认密码
         desc: ''
       },
+      id: '',
       valueHalf: 3, // 评分
       indeterminate: true,
       checkAll: false,
@@ -251,21 +254,16 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`evaluates/${self.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
-          if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
+          if (result) {
+            self.information = result
+            self.playerOptions.sources[0].src = result.commentable.play_url
+            self.commentable = result.commentable
+            self.commented = result.commented
+            self.commented.rate = Math.round(result.rate)
+            console.log(self.playerOptions)
           }
           self.loading = false
         })
@@ -275,7 +273,10 @@ export default {
     }
   },
   mounted () {
-    this.getlist(1)
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id
+      this.getlist(1)
+    }
     console.log(this.$route.query)
   }
 }
@@ -291,7 +292,8 @@ export default {
   width: 50px;
   height: 50px;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
+  background-position: center ;
   border: 2px solid #f3f3f3;
   border-radius: 50%;
   display: inline-block;

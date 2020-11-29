@@ -2,16 +2,16 @@
 <!--  评价列表-->
   <Card>
     <Tabs style="margin-top: 12px;">
-      <TabPane label="订单列表" name="adminList">
+      <TabPane label="评价列表" name="adminList">
         <Card style="margin-bottom: 32px">
           <Row :gutter="20">
             <Col span="20">
               <span>审核状态：</span>
               <Select v-model="SelectValue" style="width:200px;margin-right: 20px;">
-                <Option value="全部" label="全部"></Option>
-                <Option value="已审核" label="已审核"></Option>
-                <Option value="审核中" label="审核中"></Option>
-                <Option value="已拒绝" label="已拒绝"></Option>
+                <Option value="" label="全部"></Option>
+                <Option value="1" label="已审核"></Option>
+                <Option value="0" label="审核中"></Option>
+                <Option value="-1" label="已拒绝"></Option>
               </Select>
               <span>搜索关键词：</span>
               <Input
@@ -49,15 +49,14 @@ import dropdown from '../components/dropdown'
 import Cookies from 'js-cookie'
 
 export default {
-  name: 'authorization',
   components: {
     dropdown: dropdown
   },
   data () {
     return {
-      beginDate: '', // 反馈时间
+      beginDate: [], // 反馈时间
       CheckboxValue: false,
-      SelectValue: '全部',
+      SelectValue: '',
       search: '',
       searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
@@ -65,25 +64,34 @@ export default {
       orgColumns: [
         {
           title: '教练昵称',
-          key: 'id',
           align: 'center',
-          width: 100
+          render: (h, params) => {
+            if (params.row.commented) {
+              return h('span', params.row.commented.name)
+            }
+          }
         },
         {
           title: '学员昵称',
-          key: 'id',
           align: 'center',
-          width: 100
+          render: (h, params) => {
+            if (params.row.commentable) {
+              return h('span', params.row.commentable.user.name)
+            }
+          }
         },
         {
           title: '评价视频标题',
-          key: 'name',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            if (params.row.commentable.name) {
+              return h('span', params.row.commentable.name)
+            }
+          }
         },
         {
           title: '评星等级',
-          key: 'type',
+          key: 'rate',
           align: 'center'
         },
         {
@@ -93,7 +101,7 @@ export default {
         },
         {
           title: '状态',
-          key: 'type',
+          key: 'approved',
           align: 'center'
         },
         {
@@ -111,7 +119,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: 'evaluateDetail',
-                      query: { id: 12 }
+                      query: { id: params.row.id }
                     })
                   }
                 }
@@ -125,9 +133,9 @@ export default {
                   click: () => {
                     this.$Modal.confirm({
                       title: '温馨提示',
-                      content: `<p>你确定该订单已付款吗？</p>`,
+                      content: `<p>你确定删除该评价吗？</p>`,
                       onOk: () => {
-                        this.$Message.info('点击了确认')
+                        this.$Message.info('暂无接口')
                       },
                       onCancel: () => {
                         console.log('点击了取消')
@@ -137,62 +145,6 @@ export default {
                 }
               }, '删除')
             ])
-            // return h('div', [
-            //   h('span', {
-            //     style: {
-            //       color: '#2d8cf0',
-            //       marginRight: '18px'
-            //     },
-            //     on: {
-            //       click: () => {
-            //         this.$router.push({
-            //           name: 'orderDetail',
-            //           query: {id: 12}
-            //         })
-            //       }
-            //     }
-            //   }, '查看'),
-            //   h('span', {
-            //     style: {
-            //       color: '#ed4014',
-            //       marginRight: '18px'
-            //     },
-            //     on: {
-            //       click: () => {
-            //         this.$Modal.confirm({
-            //           title: '温馨提示',
-            //           content: `<p>你确定该订单已付款吗？</p>`,
-            //           onOk: () => {
-            //             this.$Message.info('点击了确认')
-            //           },
-            //           onCancel: () => {
-            //             console.log('点击了取消')
-            //           }
-            //         })
-            //       }
-            //     }
-            //   }, '通过'),
-            //   h('span', {
-            //     style: {
-            //       color: '#ed4014',
-            //       marginRight: '18px'
-            //     },
-            //     on: {
-            //       click: () => {
-            //         this.$Modal.confirm({
-            //           title: '温馨提示',
-            //           content: `<p>你确定该订单已付款吗？</p>`,
-            //           onOk: () => {
-            //             this.$Message.info('点击了确认')
-            //           },
-            //           onCancel: () => {
-            //             console.log('点击了取消')
-            //           }
-            //         })
-            //       }
-            //     }
-            //   }, '拒绝')
-            // ])
           }
         }
       ],
@@ -201,8 +153,40 @@ export default {
     }
   },
   methods: {
+    format (time, format) {
+      if (!time) return ''
+      var t = new Date(time)
+      var tf = function (i) {
+        return (i < 10 ? '0' : '') + i
+      }
+      return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+          case 'yyyy':
+            return tf(t.getFullYear())
+            break
+          case 'MM':
+            return tf(t.getMonth() + 1)
+            break
+          case 'mm':
+            return tf(t.getMinutes())
+            break
+          case 'dd':
+            return tf(t.getDate())
+            break
+          case 'HH':
+            return tf(t.getHours())
+            break
+          case 'ss':
+            return tf(t.getSeconds())
+            break
+        }
+      })
+    },
     reset () {
-      this.$Message.info('This is a 重置')
+      this.beginDate = []
+      this.SelectValue = ''
+      this.searchKeyword = '' // 搜索
+      this.$Message.info('已重置')
     },
     gotoPage (title) {
       this.$router.push({
@@ -222,19 +206,16 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`evaluates?page=${page}&keyword=${self.searchKeyword}`)
+      if (this.beginDate[0] && this.beginDate[1]) {
+        this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
+        this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
+      }
+
+      uAxios.get(`evaluates?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&approved=${this.SelectValue||this.SelectValue==0?this.SelectValue:''}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let { user } = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
             console.log(this.information)
           }

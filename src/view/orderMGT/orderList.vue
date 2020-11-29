@@ -8,11 +8,10 @@
               <Col span="20">
                 <span>订单状态：</span>
                 <Select v-model="SelectValue" style="width:200px;margin-right: 20px;">
-                  <Option value="全部" label="全部"></Option>
-                  <Option value="已开课" label="已开课"></Option>
-                  <Option value="已完成" label="已完成"></Option>
-                  <Option value="已取消" label="已取消"></Option>
-                  <Option value="未完成" label="未完成"></Option>
+                  <Option value="" label="全部"></Option>
+                  <Option value="PAID" label="已支付"></Option>
+                  <Option value="UNPAID" label="未支付"></Option>
+                  <Option value="CANCELED" label="已取消"></Option>
                 </Select>
                 <span>搜索关键词：</span>
                 <Input
@@ -25,7 +24,7 @@
                 <span>下单时间：</span>
                 <DatePicker type="datetimerange" placeholder="选择查询日期" v-model="beginDate"style="width:200px;margin-right: 20px;"></DatePicker>
                 <span>购买类型：</span>
-                <Select v-model="SelectValue" style="width:200px;margin-left: 14px;">
+                <Select v-model="SelectValueV2" style="width:200px;margin-left: 14px;">
                   <Option value="全部" label="全部"></Option>
                   <Option value="首次购买" label="首次购买"></Option>
                   <Option value="续卡" label="续卡"></Option>
@@ -38,6 +37,8 @@
               <Button type="primary" style="margin-left: 12px; " @click="reset('addAuthorizationUser')">重置</Button>
             </div>
           </Card>
+          <!--          <a href='/api/admin/export/orders' download="报表.xlsx">导 出</a>-->
+
           <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="reset('addAuthorizationUser')">
             导出
           </Button>
@@ -66,7 +67,8 @@ export default {
     return {
       beginDate: [], // 反馈时间
       CheckboxValue: false,
-      SelectValue: '全部',
+      SelectValue: '',
+      SelectValueV2: '',
       search: '',
       searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
@@ -113,8 +115,8 @@ export default {
           key: 'created_at',
           align: 'center',
           render: (h, params) => {
-            if (!params.row.course) {
-              return h('span', params.row.course.name)
+            if (params.row.course_rule) {
+              return h('span', params.row.course_rule.name)
             } else {
               return h('span', '接口未获取')
             }
@@ -136,14 +138,21 @@ export default {
           align: 'center'
         },
         {
+          title: '购买类型',
+          key: 'status',
+          align: 'center'
+        },
+        {
           title: '支付状态',
           key: 'pay_status',
           align: 'center',
           render: (h, params) => {
-            if (!params.row.pay_status == 'PAID') {
+            if (params.row.pay_status == 'PAID') {
               return h('span', '已支付')
-            } else {
+            } else if (params.row.pay_status == 'UNPAID') {
               return h('span', '未支付')
+            } else {
+              return h('span', '已取消')
             }
           }
         },
@@ -219,6 +228,7 @@ export default {
   },
   methods: {
     format (time, format) {
+      if (!time) return ''
       var t = new Date(time)
       var tf = function (i) {
         return (i < 10 ? '0' : '') + i
@@ -249,6 +259,7 @@ export default {
     reset () {
       this.beginDate = []
       this.SelectValue = ''
+      this.SelectValueV2 = ''
       this.searchKeyword = '' // 搜索
       this.$Message.info('已重置')
     },
@@ -274,7 +285,7 @@ export default {
         this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
         this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
       }
-      uAxios.get(`orders?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}`)
+      uAxios.get(`orders?page=${page}&keyword=${self.searchKeyword}&status=${this.SelectValueV2?this.SelectValueV2:''}&pay_status=${this.SelectValue?this.SelectValue: ''}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {

@@ -6,6 +6,12 @@
           <Row :gutter="22">
             <Col span="8">
               <Card title="订单信息">
+                <FormItem label="用户ID" prop="account">
+                  <span>{{ formValidate.user.id }}</span>
+                </FormItem>
+                <FormItem label="用户昵称" prop="account">
+                  <span>{{ formValidate.user.name }}</span>
+                </FormItem>
                 <FormItem label="订单编号" prop="account">
                   <span>{{ formValidate.trade_no }}</span>
                 </FormItem>
@@ -20,7 +26,7 @@
                   <span v-else>现金支付</span>
                 </FormItem>
                 <FormItem label="课程金额" prop="account">
-                  <span>￥{{ formValidate.trade_no }}</span>
+                  <span>￥{{ formValidate.real_price }}</span>
                 </FormItem>
                 <FormItem label="用户昵称" prop="account">
                   <span>{{ formValidate.user?formValidate.user.name:"" }}</span>
