@@ -16,7 +16,7 @@ export default {
     // dev: 'http://love.hankin.ufutx.cn/api/', // 本地环境
     // dev: 'http://wlj.test/api/',
     dev: 'http://ball.ufutx.net/api/admin/',
-    alpha: 'http://love.ufutx.com/api/', // alpha测试环境
-    pro: 'http://love.ufutx.com/api/' // 线上环境
+    alpha: 'http://ball.ufutx.net/api/admin/', // alpha测试环境
+    pro: 'http://ball.ufutx.net/api/admin/' // 线上环境
   }
 }

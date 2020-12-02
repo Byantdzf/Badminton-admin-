@@ -91,7 +91,7 @@ export default {
         {
           title: '单价',
           align: 'center',
-          key: 'totalPrice'
+          key: 'price'
         },
         {
           title: '合计',
@@ -135,7 +135,7 @@ export default {
         .then(res => {
           let result = res.data.data
           this.formValidate = result
-          this.course.push(result.course)
+          this.course.push(result.course_rule)
           this.user = result.user
           console.log(result)
           console.log(this.formValidate, this.course, this.user)

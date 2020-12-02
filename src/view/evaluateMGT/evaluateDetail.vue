@@ -41,10 +41,10 @@
 
                 </Col>
                 <Col span="20">
-                  <p style="margin-top: 12px;">{{commentable.comment}}</p>
+                  <p style="margin-top: 12px;">{{information.comment}}</p>
                 </Col>
                 <Col span="22">
-                  <Button type="error" @click="handleSubmit('formValidate')">删除</Button>
+                  <Button type="error" @click="deleteFn ()">删除</Button>
                   <Button @click="getBack" style="margin: 22px">返回</Button>
                 </Col>
               </Card>
@@ -199,19 +199,12 @@ export default {
     }
   },
   methods: {
-    handleCheckAll () {
-      if (this.indeterminate) {
-        this.checkAll = false
-      } else {
-        this.checkAll = !this.checkAll
-      }
-      this.indeterminate = false
-
-      if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
-      } else {
-        this.checkAllGroup = []
-      }
+    deleteFn () {
+      uAxios.delete(`evaluates/${this.id}`)
+        .then(res => {
+          this.$Message.info('已删除')
+          this.$router.back(-1)
+        })
     },
     checkAllGroupChange (data) {
       if (data.length === 3) {

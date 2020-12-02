@@ -135,7 +135,7 @@ export default {
                       title: '温馨提示',
                       content: `<p>你确定删除该评价吗？</p>`,
                       onOk: () => {
-                        this.$Message.info('暂无接口')
+                        this.deleteFn(params.index)
                       },
                       onCancel: () => {
                         console.log('点击了取消')
@@ -153,6 +153,14 @@ export default {
     }
   },
   methods: {
+    deleteFn (index) {
+      let id = this.information[index].id
+      uAxios.delete(`evaluates/${id}`)
+        .then(res => {
+          this.$Message.info('已删除')
+          this.information.splice(index, 1)
+        })
+    },
     format (time, format) {
       if (!time) return ''
       var t = new Date(time)
@@ -211,7 +219,7 @@ export default {
         this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
       }
 
-      uAxios.get(`evaluates?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&approved=${this.SelectValue||this.SelectValue==0?this.SelectValue:''}`)
+      uAxios.get(`evaluates?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&approved=${this.SelectValue || this.SelectValue == 0 ? this.SelectValue : ''}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {

@@ -150,47 +150,83 @@ export default {
           title: '操作',
           key: 'id',
           align: 'center',
+          width: '220',
           render: (h, params) => {
-            return h('div', [
-              h('Button', {
-                props: {
-                  type: 'primary'
-                },
-                style: {
-                  marginRight: '8px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'feedbackDetail',
-                      query: { id: params.row.id }
-                    })
+            if (params.row.status == 1) {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    type: 'primary'
+                  },
+                  style: {
+                    marginRight: '8px'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'feedbackDetail',
+                        query: { id: params.row.id }
+                      })
+                    }
                   }
-                }
-              }, '查看详情'),
-              h('Button', {
-                props: {
-                  type: 'warning'
-                },
-                style: {
-                  marginRight: '8px'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定标记为已处理吗？</p>`,
-                      onOk: () => {
-                        this.disposeFn(params.index)
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
+                }, '查看详情'),
+                h('Button', {
+                  props: {
+                    type: 'dashed',
+                    disabled: 'disabled'
+                  },
+                  style: {
+                    marginRight: '8px'
+                  },
+                  on: {
+                    click: () => {
+
+                    }
                   }
-                }
-              }, '标记处理')
-            ])
+                }, '已处理')
+              ])
+            } else {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    type: 'primary'
+                  },
+                  style: {
+                    marginRight: '8px'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'feedbackDetail',
+                        query: { id: params.row.id }
+                      })
+                    }
+                  }
+                }, '查看详情'),
+                h('Button', {
+                  props: {
+                    type: 'warning'
+                  },
+                  style: {
+                    marginRight: '8px'
+                  },
+                  on: {
+                    click: () => {
+                      this.$Modal.confirm({
+                        title: '温馨提示',
+                        content: `<p>你确定标记为已处理吗？</p>`,
+                        onOk: () => {
+                          this.disposeFn(params.index)
+                        },
+                        onCancel: () => {
+                          console.log('点击了取消')
+                        }
+                      })
+                    }
+                  }
+                }, '标记处理')
+              ])
+            }
           }
         }
       ],
@@ -255,8 +291,8 @@ export default {
       this.getlist(num)
     },
     disposeFn (index) { // 标记方法
-      console.log(this.information[index].id);
-      let {id} = this.information[index]
+      console.log(this.information[index].id)
+      let { id } = this.information[index]
       uAxios.post(`deal/feedback/logs/${id}`)
         .then(res => {
           // let result = res.data

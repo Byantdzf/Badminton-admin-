@@ -184,41 +184,69 @@ export default {
           align: 'center',
           width: 200,
           render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'orderDetail',
-                      query: { id: params.row.id }
-                    })
+            if (params.row.pay_status == 'PAID') {
+              return h('div', [
+                h('span', {
+                  style: {
+                    color: '#2d8cf0',
+                    marginRight: '18px'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'orderDetail',
+                        query: { id: params.row.id }
+                      })
+                    }
                   }
-                }
-              }, '查看详情'),
-              h('span', {
-                style: {
-                  color: '#ed4014'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定该订单已付款吗？</p>`,
-                      onOk: () => {
-                        this.$Message.info('点击了确认')
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
+                }, '查看详情'),
+                h('span', {
+                  style: {
+                    color: '#666666'
+                  },
+                  on: {
+                    click: () => {
+                    }
                   }
-                }
-              }, '确认付款')
-            ])
+                }, '已支付')
+              ])
+            } else {
+              return h('div', [
+                h('span', {
+                  style: {
+                    color: '#2d8cf0',
+                    marginRight: '18px'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'orderDetail',
+                        query: { id: params.row.id }
+                      })
+                    }
+                  }
+                }, '查看详情'),
+                h('span', {
+                  style: {
+                    color: '#ed4014'
+                  },
+                  on: {
+                    click: () => {
+                      this.$Modal.confirm({
+                        title: '温馨提示',
+                        content: `<p>你确定该订单已付款吗？</p>`,
+                        onOk: () => {
+                          this.confirmFn(params.index)
+                        },
+                        onCancel: () => {
+                          console.log('点击了取消')
+                        }
+                      })
+                    }
+                  }
+                }, '确认付款')
+              ])
+            }
           }
         }
       ],
@@ -227,6 +255,16 @@ export default {
     }
   },
   methods: {
+    confirmFn (index) {
+      let self = this
+      let { id } = this.information[index]
+      uAxios.post(`verify/orders/${id}`)
+        .then(res => {
+          this.$Message.info('已确认')
+          self.information[index].pay_status = 'PAID'
+          self.loading = false
+        })
+    },
     format (time, format) {
       if (!time) return ''
       var t = new Date(time)
@@ -285,7 +323,7 @@ export default {
         this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
         this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
       }
-      uAxios.get(`orders?page=${page}&keyword=${self.searchKeyword}&status=${this.SelectValueV2?this.SelectValueV2:''}&pay_status=${this.SelectValue?this.SelectValue: ''}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}`)
+      uAxios.get(`orders?page=${page}&keyword=${self.searchKeyword}&status=${this.SelectValueV2 ? this.SelectValueV2 : ''}&pay_status=${this.SelectValue ? this.SelectValue : ''}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {

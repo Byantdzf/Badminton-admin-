@@ -27,7 +27,7 @@
                     <Button type="primary" style="margin-left: 12px; " @click="reset()">重置</Button>
                 </div>
           </Card>
-<!--          <a href='/api/admin/export/orders' download="报表.xlsx">导 出</a>-->
+          <a href='http://ball.ufutx.net/api/admin/export/orders' download="报表.xlsx">导 出</a>
           <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="exportFn()">导出</Button>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
@@ -116,41 +116,79 @@ export default {
           width: 180,
           align: 'center',
           render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'BookingDetail',
-                      query: { id: params.row.id }
-                    })
+            if (params.row.status == '已取消') {
+              return h('div', [
+                h('span', {
+                  style: {
+                    color: '#2d8cf0',
+                    marginRight: '18px'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'BookingDetail',
+                        query: { id: params.row.id }
+                      })
+                    }
                   }
-                }
-              }, '查看详情'),
-              h('span', {
-                style: {
-                  color: '#ed4014'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定取消该预约吗？</p>`,
-                      onOk: () => {
-                        this.cancelFn(params.index)
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
+                }, '查看详情'),
+                h('span', {
+                  style: {
+                    color: '#666666'
+                  },
+                  on: {
+                    click: () => {
+                      // this.$Modal.confirm({
+                      //   title: '温馨提示',
+                      //   content: `<p>你确定取消该预约吗？</p>`,
+                      //   onOk: () => {
+                      //     this.cancelFn(params.index)
+                      //   },
+                      //   onCancel: () => {
+                      //     console.log('点击了取消')
+                      //   }
+                      // })
+                    }
                   }
-                }
-              }, '取消预约')
-            ])
+                }, '已取消')
+              ])
+            } else {
+              return h('div', [
+                h('span', {
+                  style: {
+                    color: '#2d8cf0',
+                    marginRight: '18px'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'BookingDetail',
+                        query: { id: params.row.id }
+                      })
+                    }
+                  }
+                }, '查看详情'),
+                h('span', {
+                  style: {
+                    color: '#ed4014'
+                  },
+                  on: {
+                    click: () => {
+                      this.$Modal.confirm({
+                        title: '温馨提示',
+                        content: `<p>你确定取消该预约吗？</p>`,
+                        onOk: () => {
+                          this.cancelFn(params.index)
+                        },
+                        onCancel: () => {
+                          console.log('点击了取消')
+                        }
+                      })
+                    }
+                  }
+                }, '取消预约')
+              ])
+            }
           }
         }
       ],
@@ -193,13 +231,15 @@ export default {
       window.open(`api/admin/export/course/bookings`)
     },
     cancelFn (index) { // 取消预约
-      let {id} = this.information[index]
+      let { id } = this.information[index]
       uAxios.post(`cancel/course/bookings/${id}`)
         .then(res => {
           let result = res.data.data
-          this.information.splice(index,1)
+          // this.information.splice(index,1)
           console.log(result)
           if (result) {
+            this.information[index].status = '已取消'
+            // this.getlist(1)
             this.$Message.info('已取消')
           }
         })
@@ -232,7 +272,7 @@ export default {
         this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
         this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
       }
-      uAxios.get(`course/bookings?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&status=${this.SelectValue?this.SelectValue:''}`)
+      uAxios.get(`course/bookings?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&status=${this.SelectValue ? this.SelectValue : ''}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {

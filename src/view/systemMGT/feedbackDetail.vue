@@ -24,8 +24,8 @@
 <!--               @click="showModal(index)" v-for="(item,index) in Photos"/>-->
 <!--        </div>-->
       </FormItem>
-      <FormItem label="处理人：" v-if="formValidate.admin_id">
-        <span>暂无数据</span>
+      <FormItem label="处理人：" v-if="formValidate.admin">
+        <span>{{formValidate.admin.name}}</span>
       </FormItem>
       <FormItem label="处理人ID：" v-if="formValidate.admin_id">
         <span>{{formValidate.admin_id}}</span>
@@ -83,28 +83,28 @@ export default {
     },
     handleCheckAll () {
       if (this.indeterminate) {
-        this.checkAll = false;
+        this.checkAll = false
       } else {
-        this.checkAll = !this.checkAll;
+        this.checkAll = !this.checkAll
       }
-      this.indeterminate = false;
+      this.indeterminate = false
 
       if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜'];
+        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
       } else {
-        this.checkAllGroup = [];
+        this.checkAllGroup = []
       }
     },
     checkAllGroupChange (data) {
       if (data.length === 3) {
-        this.indeterminate = false;
-        this.checkAll = true;
+        this.indeterminate = false
+        this.checkAll = true
       } else if (data.length > 0) {
-        this.indeterminate = true;
-        this.checkAll = false;
+        this.indeterminate = true
+        this.checkAll = false
       } else {
-        this.indeterminate = false;
-        this.checkAll = false;
+        this.indeterminate = false
+        this.checkAll = false
       }
     },
     handleSubmit (name) {
@@ -122,7 +122,6 @@ export default {
           console.log('点击了取消')
         }
       })
-
     },
     getBack () {
       this.$router.back(-1)

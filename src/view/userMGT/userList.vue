@@ -16,7 +16,7 @@
               placeholder="搜索用户..."
               style="width: 300px;"/>
             <p style="margin-top: 22px;">
-              <span>反馈时间：</span>
+              <span>注册时间：</span>
               <DatePicker type="datetimerange" placeholder="选择查询日期" v-model="beginDate" style="width: 280px"></DatePicker>
             </p>
             <div style="margin-top: 22px;">
