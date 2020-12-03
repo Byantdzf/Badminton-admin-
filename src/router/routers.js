@@ -11,12 +11,12 @@ import _ from 'lodash'
  *  icon: (-) 该页面在左侧菜单、面包屑和标签导航处显示的图标，如果是自定义图标，需要在图标名称前加下划线'_'
  * }
  */
-
-export const reqRoutersConfig = () => {
-  return getRouterReq().then((routersData) => {
-    let routersConfig = _.cloneDeep(routersData.data)
-    let newRoutersConfigObj = routersConfigAssembly(routersConfig)
-    store.commit('setRoutersConfig', { newRouters: newRoutersConfigObj, routersData: routersData.data })
-    return newRoutersConfigObj
-  })
-}
+// 疑问点？？？
+// export const reqRoutersConfig = () => {
+//   return getRouterReq().then((routersData) => {
+//     let routersConfig = _.cloneDeep(routersData.data)
+//     let newRoutersConfigObj = routersConfigAssembly(routersConfig)
+//     store.commit('setRoutersConfig', { newRouters: newRoutersConfigObj, routersData: routersData.data })
+//     return newRoutersConfigObj
+//   })
+// }
