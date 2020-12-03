@@ -28,6 +28,7 @@
         <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
           <Checkbox label="账号列表"></Checkbox>
           <Checkbox label="角色列表"></Checkbox>
+          <Checkbox label="意见反馈"></Checkbox>
         </CheckboxGroup>
       </FormItem>
       <FormItem>
@@ -35,7 +36,7 @@
           <Checkbox
             :indeterminate="indeterminate"
             :value="checkAll"
-            @click.prevent.native="handleCheckAll">商城管理</Checkbox>
+            @click.prevent.native="handleCheckAll">用户管理</Checkbox>
         </div>
         <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
           <Checkbox label="商品管理"></Checkbox>
@@ -88,28 +89,28 @@ export default {
   methods: {
     handleCheckAll () {
       if (this.indeterminate) {
-        this.checkAll = false;
+        this.checkAll = false
       } else {
-        this.checkAll = !this.checkAll;
+        this.checkAll = !this.checkAll
       }
-      this.indeterminate = false;
+      this.indeterminate = false
 
       if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜'];
+        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
       } else {
-        this.checkAllGroup = [];
+        this.checkAllGroup = []
       }
     },
     checkAllGroupChange (data) {
       if (data.length === 3) {
-        this.indeterminate = false;
-        this.checkAll = true;
+        this.indeterminate = false
+        this.checkAll = true
       } else if (data.length > 0) {
-        this.indeterminate = true;
-        this.checkAll = false;
+        this.indeterminate = true
+        this.checkAll = false
       } else {
-        this.indeterminate = false;
-        this.checkAll = false;
+        this.indeterminate = false
+        this.checkAll = false
       }
     },
     handleSubmit (name) {
@@ -146,7 +147,7 @@ export default {
           let result = res.data.data
           if (result.data) {
             self.information = result.data.map((item) => {
-              let {user} = item
+              let { user } = item
               user.adminId = item.id
               user.created_at = item.created_at
               user.sex = user.sex == 1 ? '男' : '女'

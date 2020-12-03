@@ -30,7 +30,7 @@
             <Button type="primary" style="margin-left: 12px; " @click="reset('addAuthorizationUser')">重置</Button>
           </div>
         </Card>
-        <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="reset('addAuthorizationUser')">
+        <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="exportFn()">
           导出
         </Button>
         <Table :loading="loading" ref="selection" :columns="orgColumns" :data="information" style="width: 100%;"
@@ -44,7 +44,7 @@
 
 <script>
 import uAxios from '../../api/index'
-import config from '../../api/config'
+import config from '@/config'
 import dropdown from '../components/dropdown'
 import Cookies from 'js-cookie'
 
@@ -153,6 +153,13 @@ export default {
     }
   },
   methods: {
+    exportFn () { // 导出数据
+      let baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
+      let oa = document.createElement('a')
+      oa.href = `${baseUrl}export/evaluates`
+      oa.download = 'htmltable-base64.xls'// 通过A标签 设置文件名
+      oa.click()
+    },
     deleteFn (index) {
       let id = this.information[index].id
       uAxios.delete(`evaluates/${id}`)

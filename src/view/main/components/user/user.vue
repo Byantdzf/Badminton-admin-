@@ -1,13 +1,13 @@
 <template>
   <div class="user-avator-dropdown">
     <Dropdown @on-click="handleClick">
-      <Avatar :src="userAvator"/>
+      <Avatar src="https://dev-file.iviewui.com/avatar_default/avatar"/>
       <Icon :size="18" type="md-arrow-dropdown"></Icon>
       <DropdownMenu slot="list">
-        <DropdownItem name="resetPassword">
-          <Icon :size="14" type="md-lock" style="margin-bottom: 2px;"></Icon>
-          修改密码
-        </DropdownItem>
+<!--        <DropdownItem name="resetPassword">-->
+<!--          <Icon :size="14" type="md-lock" style="margin-bottom: 2px;"></Icon>-->
+<!--          修改密码-->
+<!--        </DropdownItem>-->
         <DropdownItem name="logout">
           <Icon type="ios-log-out"/>
           安全登出
@@ -31,13 +31,13 @@
            no-cancel>
       <p slot="header" style="text-align: center">
         <Icon type="md-heart-outline"></Icon>
-        <span style="margin-left: 5px">福恋智能后台管理系统</span>
+        <span style="margin-left: 5px">幻鹰智能后台管理系统</span>
       </p>
       <div class="form-con">
         <login-code @on-changePassword="changePassword"></login-code>
       </div>
       <div slot="footer">
-        <p class="login-tip" style="text-align: center;color: red">【福恋智能】 -- 后台</p>
+        <p class="login-tip" style="text-align: center;color: red">【幻鹰智能】 -- 后台</p>
       </div>
     </Modal>
   </div>
@@ -45,7 +45,7 @@
 
 <script>
 import './user.less'
-import {mapActions} from 'vuex'
+import { mapActions } from 'vuex'
 import LoginForm from '../../../../components/login-form/login-form'
 import LoginCode from '../../../../components/login-form/login-code'
 import config from '@/libs/api.request'
@@ -88,8 +88,8 @@ export default {
       }
     },
     changePassword (newPassword) {
-      let vm = this,
-        {password, confirm_password} = newPassword
+      let vm = this
+      let { password, confirm_password } = newPassword
       uAxios.post(`admin/reset/password?password=${password}&confirm_password=${confirm_password}`)
         .then((response) => {
           if (response.data.code === 0) {

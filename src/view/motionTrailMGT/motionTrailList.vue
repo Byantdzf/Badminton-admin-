@@ -5,13 +5,13 @@
       <Row :gutter="20">
         <Col span="20">
           <span>评星等级：</span>
-          <Select v-model="SelectValue" style="width:200px;margin-right: 20px;">
+          <Select v-model="rate" style="width:200px;margin-right: 20px;">
             <Option value="全部" label="全部"></Option>
-            <Option value="一星" label="一星"></Option>
-            <Option value="二星" label="二星"></Option>
-            <Option value="三星" label="三星"></Option>
-            <Option value="四星" label="四星"></Option>
-            <Option value="五星" label="五星"></Option>
+            <Option value="1" label="一星"></Option>
+            <Option value="2" label="二星"></Option>
+            <Option value="3" label="三星"></Option>
+            <Option value="4" label="四星"></Option>
+            <Option value="5" label="五星"></Option>
           </Select>
           <span>搜索关键词：</span>
           <Input
@@ -34,13 +34,13 @@
     <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="reset('addAuthorizationUser')">
       导出
     </Button>
-    <Tabs style="margin-top: 12px;" v-model="type">
-      <TabPane label="打卡视频" name="card">
+    <Tabs style="margin-top: 12px;" v-model="type" @on-click="tabFn">
+      <TabPane label="打卡视频" name="CLOCKIN">
         <Table :loading="loading" ref="selection" :columns="orgColumns" :data="information" style="width: 100%;"
                border></Table>
       </TabPane>
-      <TabPane label="训练视频" name="drill">
-        <Table :loading="loading" ref="selection" :columns="orgColumns1" :data="information" style="width: 100%;"
+      <TabPane label="训练视频" name="TRAIN">
+        <Table :loading="loading" ref="selection" :columns="orgColumns" :data="information" style="width: 100%;"
                border></Table>
       </TabPane>
     </Tabs>
@@ -61,8 +61,8 @@ export default {
   },
   data () {
     return {
-      type: 'card',
-      type2: '',
+      type: 'CLOCKIN',
+      rate: 0,
       type_name: 'editCourseDetailTeam',
       beginDate: '', // 反馈时间
       CheckboxValue: false,
@@ -73,40 +73,30 @@ export default {
       id: '',
       orgColumns: [
         {
-          title: '用户ID',
+          title: 'ID',
           key: 'id',
           align: 'center',
           width: 100
         },
         {
-          title: '用户名称',
-          key: 'id',
+          title: '用户ID',
+          key: 'user_id',
           align: 'center',
           width: 100
         },
-        // {
-        //   title: '视频标题',
-        //   key: 'photo',
-        //   render: (h, params) => {
-        //     return h('img', {
-        //       attrs: {
-        //         src: params.row.photo
-        //       },
-        //       style: {
-        //         width: '48px',
-        //         height: '48px',
-        //         marginTop: '6px',
-        //         border: '4px solid #f4f4f4'
-        //       },
-        //       on: {
-        //         click: () => {
-        //         }
-        //       }
-        //     })
-        //   },
-        //   width: 80,
-        //   align: 'center'
-        // },
+        {
+          title: '学员名称',
+          align: 'center',
+          width: 100,
+          render: (h, params) => {
+            if (params.row.user) {
+              return h('span', {
+              }, params.row.user.name)
+            } else {
+              return h('span', '未获取')
+            }
+          }
+        },
         {
           title: '视频标题',
           key: 'name',
@@ -115,19 +105,26 @@ export default {
         },
         {
           title: '教练名称',
-          key: 'type',
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.other_user) {
+              return h('span', {
+              }, params.row.other_user.name)
+            } else {
+              return h('span', '未获取')
+            }
+          }
         },
-        {
-          title: '评星等级',
-          key: 'type',
-          align: 'center'
-        },
-        {
-          title: '评论内容',
-          key: 'created_at',
-          align: 'center'
-        },
+        // {
+        //   title: '评星等级',
+        //   key: 'store_name',
+        //   align: 'center'
+        // },
+        // {
+        //   title: '评论内容',
+        //   key: 'store_name',
+        //   align: 'center'
+        // },
         {
           title: '发布时间',
           key: 'created_at',
@@ -147,10 +144,17 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.$router.push({
-                      name: 'cardVideoDetail',
-                      query: {id: 12}
-                    })
+                    if (this.type == 'CLOCKIN') {
+                      this.$router.push({
+                        name: 'cardVideoDetail',
+                        query: { id: params.row.id }
+                      })
+                    } else {
+                      this.$router.push({
+                        name: 'drillVideoDetail',
+                        query: { id: params.row.id }
+                      })
+                    }
                   }
                 }
               }, '查看'),
@@ -165,114 +169,7 @@ export default {
                       title: '温馨提示',
                       content: `<p>你删除该视频吗？</p>`,
                       onOk: () => {
-                        this.$Message.info('点击了确认')
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
-                  }
-                }
-              }, '删除')
-            ])
-          }
-        }
-      ],
-      orgColumns1: [
-        {
-          title: '用户ID',
-          key: 'id',
-          align: 'center',
-          width: 100
-        },
-        {
-          title: '用户名称',
-          key: 'id',
-          align: 'center',
-          width: 100
-        },
-        // {
-        //   title: '视频标题',
-        //   key: 'photo',
-        //   render: (h, params) => {
-        //     return h('img', {
-        //       attrs: {
-        //         src: params.row.photo
-        //       },
-        //       style: {
-        //         width: '48px',
-        //         height: '48px',
-        //         marginTop: '6px',
-        //         border: '4px solid #f4f4f4'
-        //       },
-        //       on: {
-        //         click: () => {
-        //         }
-        //       }
-        //     })
-        //   },
-        //   width: 80,
-        //   align: 'center'
-        // },
-        {
-          title: '视频标题',
-          key: 'name',
-          align: 'center',
-          editable: true
-        },
-        {
-          title: '教练名称',
-          key: 'type',
-          align: 'center'
-        },
-        {
-          title: '评星等级',
-          key: 'type',
-          align: 'center'
-        },
-        {
-          title: '评论内容',
-          key: 'created_at',
-          align: 'center'
-        },
-        {
-          title: '发布时间',
-          key: 'created_at',
-          align: 'center'
-        },
-        {
-          title: '操作',
-          key: 'id',
-          width: 200,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'drillVideoDetail',
-                      query: {id: 12}
-                    })
-                  }
-                }
-              }, '查看'),
-              h('span', {
-                style: {
-                  color: '#ed4014',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定该订单已付款吗？</p>`,
-                      onOk: () => {
-                        this.$Message.info('点击了确认')
+                        this.deleteFn(params.index)
                       },
                       onCancel: () => {
                         console.log('点击了取消')
@@ -289,18 +186,15 @@ export default {
       loading: false
     }
   },
-  watch: {
-    type () {
-      if (this.type === 'card') {
-        this.type_name = 'editCourseDetailTeam'
-      } else if (this.type === 'network') {
-        this.type_name = 'editCourseDetailNetwork'
-      } else {
-        this.type_name = 'editCourseDetailExperience'
-      }
-    }
-  },
   methods: {
+    deleteFn (index) {
+      let { id } = this.information[index]
+      uAxios.delete(`video/logs/${id}`)
+        .then(res => {
+          this.information.splice(index, 1)
+          this.$Message.info('删除成功')
+        })
+    },
     reset () {
       this.$Message.info('This is a 重置')
     },
@@ -312,8 +206,9 @@ export default {
     handleSelectAll (status) {
       this.$refs.selection.selectAll(status)
     },
-    batchFn () {
-      this.$Message.info('This is a test')
+    tabFn () {
+      this.getlist(1)
+      // this.$Message.info('This is a test')
     },
     handlePage (num) { // 分页
       this.getlist(num)
@@ -321,21 +216,12 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`video/logs?page=${page}&keyword=${self.searchKeyword}&rate=${self.rate == '全部' ? '' : self.rate}&type=${self.type}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
+            self.information = result.data
             self.orgTotal = result.total
-            console.log(this.information)
           }
           self.loading = false
         })

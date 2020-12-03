@@ -13,9 +13,9 @@
                     class="photo"></div>
                 </Col>
                 <Col span="14">
-                  <p style="margin-top: 12px;">mamba</p>
-                  <p style="margin-top: 12px;">这里是视频标题</p>
-                  <p style="margin-top: 12px;">发布时间： 2020/10/10 14:09</p>
+                  <p style="margin-top: 12px;">{{ video.updated_at }}</p>
+                  <p style="margin-top: 12px;">{{video.name}}</p>
+                  <p style="margin-top: 12px;">发布时间： {{video.updated_at}}</p>
                 </Col>
                 <Col span="14" offset="1">
                   <div class='videoStyle'>
@@ -28,26 +28,29 @@
                 </Col>
               </Card>
               <Card title="评价信息" style="margin-top: 24px;overflow: hidden;">
-                <Col span="3">
-                  <div
-                    style="background-image: url('https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg')"
-                    class="photo"></div>
+                <span v-if="comments.length < 1">暂无评价信息</span>
+                <div v-for="(item,i) in comments">
+                  <Col span="3">
+<!--                  <div-->
+<!--                    :style="{backgroundImage: 'url('+ item.commentable.user.name +')'}"-->
+<!--                    class="photo"></div>-->
                 </Col>
                 <Col span="20">
                   <p style="margin-top: 12px;">mamba
-                    <Rate allow-half v-model="valueHalf" style="float: right"/>
+                    <Rate allow-half v-model="item.rate" style="float: right"/>
                   </p>
-                  <p style="margin-top: 12px;">发布时间： 2020/10/10 14:09</p>
+                  <p style="margin-top: 12px;">发布时间： {{item.created_at}}</p>
 
                 </Col>
                 <Col span="20">
-                  <p style="margin-top: 12px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</p>
+                  <p style="margin-top: 12px;">{{item.comment}}</p>
                 </Col>
-                <Col span="22">
-                  <Button type="error" @click="handleSubmit('formValidate')">删除</Button>
-                  <Button @click="getBack" style="margin: 22px">返回</Button>
-                </Col>
+                </div>
               </Card>
+              <Col span="22">
+                <Button type="error" @click="deleteFn()">删除</Button>
+                <Button @click="getBack" style="margin: 22px">返回</Button>
+              </Col>
             </Col>
           </Row>
         </Form>
@@ -91,20 +94,12 @@ export default {
           fullscreenToggle: true // 是否显示全屏按钮
         }
       },
-      formValidate: {
-        state: 'start', // 状态
-        name: '',
-        mail: '',
-        role: '',
-        mobile: '',
-        account: '', // 账号
-        password: '', // 密码
-        confirmPassword: '', // 确认密码
-        desc: ''
-      },
+      formValidate: {},
       valueHalf: 3, // 评分
       indeterminate: true,
       checkAll: false,
+      video: {},
+      comments: {},
       columns: [
         {
           title: '课程名称',
@@ -196,31 +191,22 @@ export default {
     }
   },
   methods: {
-    handleCheckAll () {
-      if (this.indeterminate) {
-        this.checkAll = false
-      } else {
-        this.checkAll = !this.checkAll
-      }
-      this.indeterminate = false
-
-      if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
-      } else {
-        this.checkAllGroup = []
-      }
-    },
-    checkAllGroupChange (data) {
-      if (data.length === 3) {
-        this.indeterminate = false
-        this.checkAll = true
-      } else if (data.length > 0) {
-        this.indeterminate = true
-        this.checkAll = false
-      } else {
-        this.indeterminate = false
-        this.checkAll = false
-      }
+    deleteFn (index) {
+      let vm = this
+      vm.$Modal.confirm({
+        title: '温馨提示',
+        content: `<p>你删除该视频吗？</p>`,
+        onOk: () => {
+          uAxios.delete(`video/logs/${vm.id}`)
+            .then(res => {
+              vm.$Message.info('删除成功')
+              vm.$router.back(-1)
+            })
+        },
+        onCancel: () => {
+          console.log('点击了取消')
+        }
+      })
     },
     handleSubmit (name) {
       this.$refs[name].validate((valid) => {
@@ -251,21 +237,18 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`video/logs/${self.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
-          let result = res.data.data
+          let result = res.data
           if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
+            self.comments = result.data.comments.data
+            for (let item of self.comments) {
+              item.rate = Math.round(item.rate)
+            }
+            self.video = result.data.video
+            self.orgTotal = result.data.comments.total
+            self.playerOptions.sources[0].src = self.video.play_url
+            console.log(self.comments, self.video)
           }
           self.loading = false
         })
@@ -275,7 +258,11 @@ export default {
     }
   },
   mounted () {
-    this.getlist(1)
+    let id = this.$route.query.id
+    if (id) {
+      this.id = id
+      this.getlist(1)
+    }
     console.log(this.$route.query)
   }
 }
@@ -291,7 +278,7 @@ export default {
   width: 50px;
   height: 50px;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
   border: 2px solid #f3f3f3;
   border-radius: 50%;
   display: inline-block;

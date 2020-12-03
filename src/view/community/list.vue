@@ -173,10 +173,10 @@ export default {
       orgTotal: 0,
       access: localStorage.getItem('access'),
       tab: [
-        {title: '分类管理', name: 'classify'},
-        {title: '社群管理', name: 'association'},
-        {title: '动态管理', name: 'dynamic'},
-        {title: '动态举报', name: 'report'}
+        { title: '分类管理', name: 'classify' },
+        { title: '社群管理', name: 'association' },
+        { title: '动态管理', name: 'dynamic' },
+        { title: '动态举报', name: 'report' }
       ],
       community_id: '',
       user_id: '',
@@ -203,7 +203,7 @@ export default {
             return h('div', {
               on: {
                 click: () => {
-                  let argu = {id: params.row.user_id}
+                  let argu = { id: params.row.user_id }
                   this.$router.push({
                     name: 'userCommunity',
                     params: argu
@@ -252,7 +252,7 @@ export default {
               },
               on: {
                 click: () => {
-                  this.showPhoto (params.row.qrcode)
+                  this.showPhoto(params.row.qrcode)
                 }
               }
             })
@@ -279,7 +279,7 @@ export default {
             return h('i-switch', {
               props: {
                 size: 'large',
-                value: Boolean(params.row.is_hided == '1' ? false : true)
+                value: Boolean(params.row.is_hided != '1')
               },
               scopedSlots: {
                 open: () => h('span', '开启'),
@@ -309,7 +309,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    let argu = {id: params.row.id}
+                    let argu = { id: params.row.id }
                     this.$router.push({
                       name: 'communityParticulars',
                       params: argu
@@ -326,7 +326,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    let argu = {id: params.row.id}
+                    let argu = { id: params.row.id }
                     this.$router.push({
                       name: 'Member',
                       params: argu
@@ -343,7 +343,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    let argu = {id: params.row.id}
+                    let argu = { id: params.row.id }
                     this.$router.push({
                       name: 'dynamicList',
                       params: argu
@@ -463,7 +463,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    let argu = {id: params.row.id}
+                    let argu = { id: params.row.id }
                     this.$router.push({
                       name: 'classifyList',
                       params: argu
@@ -554,7 +554,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    let argu = {id: params.row.id}
+                    let argu = { id: params.row.id }
                     this.$router.push({
                       name: 'dynamicParticulars',
                       params: argu
@@ -646,7 +646,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    let argu = {id: params.row.id}
+                    let argu = { id: params.row.id }
                     this.$router.push({
                       name: 'dynamicReport',
                       params: argu
@@ -685,14 +685,14 @@ export default {
       this.getlist(num)
     },
     report () {
-      let argu = {id: 0}
+      let argu = { id: 0 }
       this.$router.push({
         name: 'report',
         params: argu
       })
     },
     newCommunity () {
-      let argu = {id: 0}
+      let argu = { id: 0 }
       this.$router.push({
         name: 'newCommunity',
         params: argu
@@ -820,12 +820,12 @@ export default {
       })
     },
     addclassify () { // 添加
-      let self = this,
-        data = {
-          logo: self.logo,
-          title: self.title,
-          intro: self.intro
-        }
+      let self = this
+      let data = {
+        logo: self.logo,
+        title: self.title,
+        intro: self.intro
+      }
       uAxios.post('admin/community/group', data).then((response) => {
         if (response.data.code === 0) {
           this.$Message.info('添加成功')
@@ -839,12 +839,12 @@ export default {
     },
     modification (value) { // 修改
       console.log(value, '56565')
-      let self = this,
-        data = {
-          logo: self.logo,
-          title: self.title,
-          intro: self.intro
-        }
+      let self = this
+      let data = {
+        logo: self.logo,
+        title: self.title,
+        intro: self.intro
+      }
       uAxios.put('admin/community/groups/' + self.group_id, data).then((response) => {
         if (response.data.code === 0) {
           this.$Message.info('修改成功')
@@ -869,66 +869,66 @@ export default {
             height: 600,
             data: [
               {
-                name: '福恋',
+                name: '幻鹰',
                 children: [
                   {
                     name: 'cluster',
                     children: [
-                      {name: 'optim'},
-                      {name: 'zation'},
-                      {name: 'zation'},
-                      {name: 'voptim'}
+                      { name: 'optim' },
+                      { name: 'zation' },
+                      { name: 'zation' },
+                      { name: 'voptim' }
                     ]
                   },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
-                    children: [{name: 'optim'}, {name: 'zation'}, {name: 'zation'}, {name: 'voptim'}]},
+                    children: [{ name: 'optim' }, { name: 'zation' }, { name: 'zation' }, { name: 'voptim' }] },
                   {
                     name: 'cluster',
                     children: [
-                      {name: 'optim', children: [{name: 'optim', children: [{name: 'optim', children: [{name: 'optim', children: [{name: 'optim', children: [{name: 'optim'}]}]}]}]}]},
-                      {name: 'zation'},
-                      {name: 'zation'},
-                      {name: 'voptim'}
+                      { name: 'optim', children: [{ name: 'optim', children: [{ name: 'optim', children: [{ name: 'optim', children: [{ name: 'optim', children: [{ name: 'optim' }] }] }] }] }] },
+                      { name: 'zation' },
+                      { name: 'zation' },
+                      { name: 'voptim' }
                     ]
                   }
                 ]

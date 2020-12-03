@@ -24,7 +24,7 @@
                     <Button type="primary" style="margin-left: 12px; " @click="reset('addAuthorizationUser')">重置</Button>
                 </div>
           </Card>
-          <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="reset('addAuthorizationUser')">导出</Button>
+          <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="exportFn()">导出</Button>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border  @on-selection-change="handleSelect"></Table>
           <div style="margin-top:16px;">
             <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
@@ -44,7 +44,7 @@
 
 <script>
 import uAxios from '../../api/index'
-import config from '../../api/config'
+import config from '@/config'
 import dropdown from '../components/dropdown'
 import Cookies from 'js-cookie'
 
@@ -111,11 +111,17 @@ export default {
           key: 'type',
           align: 'center',
           render: (h, params) => {
+            let isShow = ''
+            if (params.row.is_show == '1') {
+              isShow = true
+            } else {
+              isShow = false
+            }
             if (params.row.is_show) {
               return h('i-switch', {
                 props: {
                   size: 'large',
-                  value: Boolean(params.row.is_show)
+                  value: isShow
                 },
                 scopedSlots: {
                   open: () => h('span', '启用'),
@@ -123,11 +129,8 @@ export default {
                 },
                 on: {
                   'on-change': (value) => {
-                    this.$Message.success('无接口!')
-                    return
-                    console.log(value)
                     let data = {
-                      is_show: value
+                      is_show: value ? '1' : '0'
                     }
                     uAxios.post(`users/${params.row.id}`, data)
                       .then(res => {
@@ -172,6 +175,13 @@ export default {
     }
   },
   methods: {
+    exportFn () { // 导出数据
+      let baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
+      let oa = document.createElement('a')
+      oa.href = `${baseUrl}export/users`
+      oa.download = 'htmltable-base64.xls'// 通过A标签 设置文件名
+      oa.click()
+    },
     format (time, format) {
       var t = new Date(time)
       var tf = function (i) {

@@ -37,7 +37,7 @@
     <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="gotoPage(type_name)">
       新增
     </Button>
-    <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="reset('addAuthorizationUser')">
+    <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="exportFn()">
       导出
     </Button>
     <Tabs style="margin-top: 12px;" v-model="type" @on-click="TabFn">
@@ -63,7 +63,7 @@
 
 <script>
 import uAxios from '../../api/index'
-import config from '../../api/config'
+import config from '@/config'
 import dropdown from '../components/dropdown'
 import Cookies from 'js-cookie'
 
@@ -461,6 +461,13 @@ export default {
     }
   },
   methods: {
+    exportFn () { // 导出数据
+      let baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
+      let oa = document.createElement('a')
+      oa.href = `${baseUrl}export/courses`
+      oa.download = 'htmltable-base64.xls'// 通过A标签 设置文件名
+      oa.click()
+    },
     operationFn (index) {
       // 上下架操作
       console.log(index)

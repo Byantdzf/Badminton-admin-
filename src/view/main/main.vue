@@ -44,8 +44,8 @@ import TagsNav from './components/tags-nav'
 import User from './components/user'
 import Fullscreen from './components/fullscreen'
 import Language from './components/language'
-import {mapMutations, mapActions} from 'vuex'
-import {getNewTagList, getNextRoute, routeEqual, getLocalStorage} from '@/libs/util'
+import { mapMutations, mapActions } from 'vuex'
+import { getNewTagList, getNextRoute, routeEqual, getLocalStorage } from '@/libs/util'
 import minLogo from '@/assets/images/logo-min.png'
 import maxLogo from '@/assets/images/logo.png'
 import './main.less'
@@ -109,7 +109,7 @@ export default {
       'handleLogin'
     ]),
     turnToPage (route) {
-      let {name, params, query, path} = {}
+      let { name, params, query, path } = {}
       if (typeof route === 'string') {
         name = route
       } else {

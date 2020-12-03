@@ -5,18 +5,18 @@
 <template>
   <div class="login ">
     <div class="login-con">
-      <!--<Card icon="md-heart-outline" class="interim" title="福恋智能后台管理系统" :bordered="false" v-if="!changeCode">-->
+      <!--<Card icon="md-heart-outline" class="interim" title="幻鹰智能后台管理系统" :bordered="false" v-if="!changeCode">-->
       <!--<div class="form-con">-->
       <!--<login-form @on-success-valid="handleSubmit" :load="loading"></login-form>-->
-      <!--<p class="login-tip">【福恋智能】 &#45;&#45; 后台-->
+      <!--<p class="login-tip">【幻鹰智能】 &#45;&#45; 后台-->
       <!--<a style="float: right;" @click="changeCode=true">忘记密码？</a>-->
       <!--</p>-->
       <!--</div>-->
       <!--</Card>-->
-      <Card icon="md-heart-outline" class="interim" title="福恋智能后台管理系统" :bordered="false">
+      <Card icon="md-heart-outline" class="interim" title="幻鹰智能后台管理系统" :bordered="false">
         <div class="form-con">
           <login-code @on-changePassword="changePassword" :load="loading"></login-code>
-          <p class="login-tip">【福恋智能】 -- 后台
+          <p class="login-tip">【幻鹰智能】 -- 后台
             <!--<a style="float: right;" @click="changeCode=false">登录系统 </a>-->
           </p>
         </div>
@@ -29,7 +29,7 @@
 import LoginForm from '_c/login-form'
 import LoginCode from '../../components/login-form/login-code'
 import config from '@/libs/api.request'
-import {mapActions} from 'vuex'
+import { mapActions } from 'vuex'
 import uAxios from '../../api/index'
 
 export default {
@@ -53,10 +53,10 @@ export default {
       'handleLogin',
       'getRoutersConfig'
     ]),
-    handleSubmit ({userName, password}) {
+    handleSubmit ({ userName, password }) {
       const _this = this
       _this.loading = true
-      _this.handleLogin({userName, password}).then(res => {
+      _this.handleLogin({ userName, password }).then(res => {
         console.log(res)
         if (res.code === 1) {
           setTimeout(() => {
@@ -96,8 +96,8 @@ export default {
       })
     },
     changePassword (newPassword) {
-      let vm = this,
-        {password, confirm_password} = newPassword
+      let vm = this
+      let { password, confirm_password } = newPassword
       this.loading = false
       uAxios.post(`admin/reset/password?password=${password}&confirm_password=${confirm_password}`)
         .then((response) => {

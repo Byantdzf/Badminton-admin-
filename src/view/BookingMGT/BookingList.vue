@@ -27,7 +27,6 @@
                     <Button type="primary" style="margin-left: 12px; " @click="reset()">重置</Button>
                 </div>
           </Card>
-          <a href='http://ball.ufutx.net/api/admin/export/orders' download="报表.xlsx">导 出</a>
           <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="exportFn()">导出</Button>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
@@ -40,7 +39,7 @@
 
 <script>
 import uAxios from '../../api/index'
-import config from '../../api/config'
+import config from '@/config'
 import dropdown from '../components/dropdown'
 import Cookies from 'js-cookie'
 
@@ -228,7 +227,11 @@ export default {
       })
     },
     exportFn () { // 导出数据
-      window.open(`api/admin/export/course/bookings`)
+      let baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
+      let oa = document.createElement('a')
+      oa.href = `${baseUrl}export/course/bookings`
+      oa.download = 'htmltable-base64.xls'// 通过A标签 设置文件名
+      oa.click()
     },
     cancelFn (index) { // 取消预约
       let { id } = this.information[index]

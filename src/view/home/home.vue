@@ -117,7 +117,7 @@
         </TabPane>
         <TabPane label="周收入报表" name="3" v-if="access === 'admin'">
           <Row class="margin-top-10">
-            <h4 style="text-align: center;margin: 22px;">福恋数据</h4>
+            <h4 style="text-align: center;margin: 22px;">幻鹰数据</h4>
             <div class="line-chart-con">
               <report-data :columnar="columnar"></report-data>
             </div>
@@ -151,14 +151,14 @@ export default {
       count: {
         createUser: 0, // 新增总数
         collection: 0, // 单身
-        transfer: 0    // 介绍人
+        transfer: 0 // 介绍人
       },
       count1: {
         allUser: 0, // 所有用户
         certificationUser: 0, // 认证用户
-        shutDownDataUser: 0,    // 关闭资料用户
-        single: 0,  // 单身
-        references: 0,    // 介绍人
+        shutDownDataUser: 0, // 关闭资料用户
+        single: 0, // 单身
+        references: 0, // 介绍人
         sex_group: [], // 性别
         age_group: [], // 年龄
         age_sex: []
@@ -292,7 +292,7 @@ export default {
         }
       })
     },
-    getNewData() {
+    getNewData () {
       this.getData()
       this.classifyData()
     },
@@ -310,7 +310,7 @@ export default {
             certificationUser: result.user_count.is_approved,
             shutDownDataUser: result.user_count.hidden_profile,
             single: result.user_count.single,
-            references: result.user_count.marriage,
+            references: result.user_count.marriage
           }
         })
     },
@@ -330,7 +330,7 @@ export default {
             references: result.user_count.marriage,
             age_sex: result.user_count.age_sex,
             age_group: result.user_count.age_group,
-            sex_group: result.user_count.sex_group,
+            sex_group: result.user_count.sex_group
           }
           if (this.count1.sex_group.length != 0) {
             this.womenProportion = parseFloat(parseInt(this.count1.sex_group[2]) / (parseInt(this.count1.sex_group[0]) + parseInt(this.count1.sex_group[1]) + parseInt(this.count1.sex_group[2]))).toFixed(2) * 100 + '%'
@@ -356,7 +356,7 @@ export default {
               },
               series: [
                 {
-                  name: '福恋数据',
+                  name: '幻鹰数据',
                   type: 'pie',
                   selectedMode: 'single',
                   radius: [0, '30%'],
@@ -369,7 +369,7 @@ export default {
                   }
                 },
                 {
-                  name: '福恋数据',
+                  name: '幻鹰数据',
                   type: 'pie',
                   radius: ['40%', '55%'],
                   label: {
@@ -403,23 +403,23 @@ export default {
                     }
                   },
                   data: [
-                    {value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[2].count, name: '31-40岁'},
-                    {value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[1].count, name: '21-30岁'},
-                    {value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[5].count, name: '61岁以上'},
-                    {value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[0].count, name: '20岁以下'},
-                    {value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[3].count, name: '41-50岁'},
-                    {value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[4].count, name: '51-60岁'},
+                    { value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[2].count, name: '31-40岁' },
+                    { value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[1].count, name: '21-30岁' },
+                    { value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[5].count, name: '61岁以上' },
+                    { value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[0].count, name: '20岁以下' },
+                    { value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[3].count, name: '41-50岁' },
+                    { value: self.count1.age_group.length == 0 ? 0 : self.count1.age_group[4].count, name: '51-60岁' }
                   ]
                 }
               ]
-            };
+            }
           } else {
             this.menUsers = {
               color: ['#323CF0'],
               title: {
-                text: '福恋数据',
-                subtext:'总人数 ' + (parseInt(this.count1.sex_group.length == 0 ? 0: this.count1.sex_group[0]) + parseInt(this.count1.sex_group.length == 0 ? 0: this.count1.sex_group[1]) + parseInt(this.count1.sex_group.length == 0 ? 0: this.count1.sex_group[2])),
-                left:'left',
+                text: '幻鹰数据',
+                subtext: '总人数 ' + (parseInt(this.count1.sex_group.length == 0 ? 0 : this.count1.sex_group[0]) + parseInt(this.count1.sex_group.length == 0 ? 0 : this.count1.sex_group[1]) + parseInt(this.count1.sex_group.length == 0 ? 0 : this.count1.sex_group[2])),
+                left: 'left',
                 padding: [0, 0, 14, 0],
                 textStyle: {
                   color: '#323CF0'
@@ -431,10 +431,10 @@ export default {
               tooltip: {
                 show: true,
                 feature: {
-                  dataView: {show: true, readOnly: false},
-                  magicType: {show: true, type: ['line', 'bar']},
-                  restore: {show: true},
-                  saveAsImage: {show: true}
+                  dataView: { show: true, readOnly: false },
+                  magicType: { show: true, type: ['line', 'bar'] },
+                  restore: { show: true },
+                  saveAsImage: { show: true }
                 }
               },
               calculable: true,
@@ -464,7 +464,7 @@ export default {
                   type: 'bar',
                   data: [this.count1.age_sex['20'].length == 0 ? 0 : this.count1.age_sex['20'][1], this.count1.age_sex['21-30'].length == 0 ? 0 : this.count1.age_sex['21-30'][1], this.count1.age_sex['31-40'].length == 0 ? 0 : this.count1.age_sex['31-40'][1], this.count1.age_sex['41-50'].length == 0 ? 0 : this.count1.age_sex['41-50'][1], this.count1.age_sex['51-60'].length == 0 ? 0 : this.count1.age_sex['51-60'][1], this.count1.age_sex['61'].length == 0 ? 0 : this.count1.age_sex['61'][1]],
                   itemStyle: {
-                    emphasis: {color: '#323CF0'},
+                    emphasis: { color: '#323CF0' },
                     normal: {
                       color: function (params) {
                         var colorList = ['rgb(50,63,240)']
@@ -473,7 +473,7 @@ export default {
                       label: {
                         show: true,
                         position: 'top',
-                        textstyle: {color: 'black', fontSize: 14}
+                        textstyle: { color: 'black', fontSize: 14 }
                       }
                     }
                   }
@@ -483,7 +483,7 @@ export default {
                   type: 'bar',
                   data: [this.count1.age_sex['20'].length == 0 ? 0 : this.count1.age_sex['20'][2], this.count1.age_sex['21-30'].length == 0 ? 0 : this.count1.age_sex['21-30'][2], this.count1.age_sex['31-40'].length == 0 ? 0 : this.count1.age_sex['31-40'][2], this.count1.age_sex['41-50'].length == 0 ? 0 : this.count1.age_sex['41-50'][2], this.count1.age_sex['51-60'].length == 0 ? 0 : this.count1.age_sex['51-60'][2], this.count1.age_sex['61'].length == 0 ? 0 : this.count1.age_sex['61'][2]],
                   itemStyle: {
-                    emphasis: {color: '#ff0006'},
+                    emphasis: { color: '#ff0006' },
                     normal: {
                       color: function (params) {
                         var colorList = ['rgb(255,0,0)']
@@ -492,7 +492,7 @@ export default {
                       label: {
                         show: true,
                         position: 'top',
-                        textstyle: {color: 'black', fontSize: 14}
+                        textstyle: { color: 'black', fontSize: 14 }
                       }
                     }
                   }
@@ -502,7 +502,7 @@ export default {
                   type: 'bar',
                   data: [this.count1.age_sex['20'].length == 0 ? 0 : this.count1.age_sex['20'][0], this.count1.age_sex['21-30'].length == 0 ? 0 : this.count1.age_sex['21-30'][0], this.count1.age_sex['31-40'].length == 0 ? 0 : this.count1.age_sex['31-40'][0], this.count1.age_sex['41-50'].length == 0 ? 0 : this.count1.age_sex['41-50'][0], this.count1.age_sex['51-60'].length == 0 ? 0 : this.count1.age_sex['51-60'][0], this.count1.age_sex['61'].length == 0 ? 0 : this.count1.age_sex['61'][0]],
                   itemStyle: {
-                    emphasis: {color: '#9f9f95'},
+                    emphasis: { color: '#9f9f95' },
                     normal: {
                       color: function (params) {
                         var colorList = ['rgb(159,159,159)']
@@ -511,7 +511,7 @@ export default {
                       label: {
                         show: true,
                         position: 'top',
-                        textstyle: {color: 'black', fontSize: 14}
+                        textstyle: { color: 'black', fontSize: 14 }
                       }
                     }
                   }
@@ -566,7 +566,7 @@ export default {
                 type: 'bar',
                 data: self.Data_newArr.approve_refund_cash_arr,
                 itemStyle: {
-                  emphasis: {color: '#19F0CD'},
+                  emphasis: { color: '#19F0CD' },
                   normal: {
                     color: function (params) {
                       var colorList = ['rgb(25,240,205)']
@@ -575,7 +575,7 @@ export default {
                     label: {
                       show: true,
                       position: 'top',
-                      textstyle: {color: 'black', fontSize: 14}
+                      textstyle: { color: 'black', fontSize: 14 }
                     }
                   }
                 }
@@ -585,7 +585,7 @@ export default {
                 type: 'bar',
                 data: self.Data_newArr.pay_orders_cash_arr,
                 itemStyle: {
-                  emphasis: {color: '#2999B7'},
+                  emphasis: { color: '#2999B7' },
                   normal: {
                     color: function (params) {
                       var colorList = ['rgb(41,153,183)']
@@ -594,7 +594,7 @@ export default {
                     label: {
                       show: true,
                       position: 'top',
-                      textstyle: {color: 'black', fontSize: 14}
+                      textstyle: { color: 'black', fontSize: 14 }
                     }
                   }
                 }
@@ -604,7 +604,7 @@ export default {
                 type: 'bar',
                 data: self.Data_newArr.activity_cash_arr,
                 itemStyle: {
-                  emphasis: {color: '#F27844'},
+                  emphasis: { color: '#F27844' },
                   normal: {
                     color: function (params) {
                       var colorList = ['rgb(242,120,68)']
@@ -613,7 +613,7 @@ export default {
                     label: {
                       show: true,
                       position: 'top',
-                      textstyle: {color: 'black', fontSize: 14}
+                      textstyle: { color: 'black', fontSize: 14 }
                     }
                   }
                 }
@@ -623,7 +623,7 @@ export default {
                 type: 'bar',
                 data: self.Data_newArr.award_cash_arr,
                 itemStyle: {
-                  emphasis: {color: '#909090'},
+                  emphasis: { color: '#909090' },
                   normal: {
                     color: function (params) {
                       var colorList = ['rgb(114,114,114)']
@@ -632,7 +632,7 @@ export default {
                     label: {
                       show: true,
                       position: 'top',
-                      textstyle: {color: 'black', fontSize: 14}
+                      textstyle: { color: 'black', fontSize: 14 }
                     }
                   }
                 }
