@@ -38,13 +38,34 @@
                 </FormItem>
               </Card>
               <Card title="门店提成记录" style="margin-top: 22px;">
+                <Button type="primary" style="margin-bottom: 22px; " @click="setFn()">设置提成</Button>
                 <Table border :columns="columns" :data="push_money"></Table>
+              </Card>
+              <Card title="教练列表" style="margin-top: 22px;">
+                <Button type="primary" style="margin-bottom: 22px; " @click="addCoach=!addCoach">新增教练</Button>
+                <Table border :columns="coachColumns" :data="coachList"></Table>
               </Card>
             </Col>
           </Row>
         </Form>
       </TabPane>
     </Tabs>
+    <Modal v-model="addCoach" width="460" title="新增门店教练" @on-ok="addCoachFn" >
+      <Form :label-width="100" >
+        <FormItem label="教练头像：">
+          <uploadImage v-on:uploadPictures="uploadCoachPic" :pic="coachPic"></uploadImage>
+        </FormItem>
+        <FormItem label="教练昵称：">
+          <Input v-model="coachName" placeholder="请输入昵称" style="max-width:220px;"></Input>
+        </FormItem>
+        <FormItem label="教练手机号：">
+          <Input v-model="coachMobile" placeholder="请输入昵称" style="max-width:220px;"></Input>
+        </FormItem>
+        <FormItem label="登录密码：">
+          <Input v-model="coachPassword" placeholder="请输入登录密码" style="max-width:220px;"></Input>
+        </FormItem>
+      </Form>
+    </Modal>
     <Modal v-model="showMapModel" width="860" title="活动地址" @on-ok="ok">
       <Geolocation  @getLocation="getLocation"  @hideModal="hideModal" :setLocation="setLocation" ></Geolocation>
     </Modal>
@@ -73,6 +94,11 @@ export default {
   },
   data () {
     return {
+      addCoach: false,
+      coachPic: '',
+      coachName: '',
+      coachMobile: '',
+      coachPassword: '',
       userID: '',
       showMapModel: false,
       userList: [],
@@ -100,6 +126,29 @@ export default {
         time: '',
         num: ''
       },
+      coachList: [],
+      coachColumns: [
+        {
+          title: '头像',
+          key: 'created_at',
+          align: 'center'
+        },
+        {
+          title: '昵称',
+          key: 'value',
+          align: 'center'
+        },
+        {
+          title: '手机号',
+          key: 'updated_at',
+          align: 'center'
+        },
+        {
+          title: '登录密码',
+          key: 'updated_at',
+          align: 'center'
+        }
+      ],
       columns: [
         {
           title: '时间',
@@ -134,6 +183,12 @@ export default {
     }
   },
   methods: {
+    setFn () {
+      this.$router.push({
+        name: 'shopDeduct',
+        query: { id: this.id }
+      })
+    },
     saveFn () {
       let vm = this
       console.log(vm.formItem)
@@ -194,6 +249,9 @@ export default {
     uploadPictureV2 (image) {
       this.formItem.business_license = image //
     },
+    uploadCoachPic (image) {
+      this.coachPic = image // 教练头像
+    },
     handleView (name) {
       this.imgName = name
       this.visible = true
@@ -209,6 +267,21 @@ export default {
     ok () {
       this.$Message.info('Clicked ok')
     },
+    addCoachFn () { // 添加教练
+      let data = {
+        photo: this.coachPic,
+        name: this.coachName,
+        mobile: this.coachMobile,
+        password: this.coachPassword
+      }
+      uAxios.post(`stores/${this.id}/coach`, data)
+        .then(res => {
+          let result = res.data.data
+          console.log(result)
+          this.$Message.success('添加成功')
+        })
+    },
+
     cancel () {
       this.$Message.info('Clicked cancel')
     },
