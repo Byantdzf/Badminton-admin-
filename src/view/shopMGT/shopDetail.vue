@@ -43,7 +43,7 @@
               </Card>
               <Card title="教练列表" style="margin-top: 22px;">
                 <Button type="primary" style="margin-bottom: 22px; " @click="addCoach=!addCoach">新增教练</Button>
-                <Table border :columns="coachColumns" :data="coachList"></Table>
+                <Table border :columns="coachColumns" :data="coaches"></Table>
               </Card>
             </Col>
           </Row>
@@ -106,6 +106,7 @@ export default {
       shopDetail: {},
       setLocation: [],
       push_money: [],
+      coaches: [],
       title: '新增门店详情',
       filePath: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
       sizeList: [
@@ -130,34 +131,57 @@ export default {
       coachColumns: [
         {
           title: '头像',
-          key: 'created_at',
+          key: 'photo',
+          render: (h, params) => {
+            return h('img', {
+              attrs: {
+                src: params.row.photo
+              },
+              style: {
+                width: '48px',
+                height: '48px',
+                marginTop: '6px',
+                border: '4px solid #f4f4f4'
+              },
+              on: {
+                click: () => {
+                }
+              }
+            })
+          },
+          width: 80,
           align: 'center'
         },
         {
           title: '昵称',
-          key: 'value',
+          key: 'name',
           align: 'center'
         },
         {
           title: '手机号',
-          key: 'updated_at',
+          key: 'mobile',
           align: 'center'
         },
         {
-          title: '登录密码',
-          key: 'updated_at',
+          title: '创建时间',
+          key: 'created_at',
           align: 'center'
         }
       ],
       columns: [
         {
-          title: '时间',
+          title: '创建时间',
           key: 'created_at',
           align: 'center'
         },
         {
           title: '提成金额（元）',
           key: 'value',
+          align: 'center'
+        },
+        {
+          title: '提成比例（%）',
+          key: 'ratio',
           align: 'center'
         },
         {
@@ -279,6 +303,7 @@ export default {
           let result = res.data.data
           console.log(result)
           this.$Message.success('添加成功')
+          this.getlist(1)
         })
     },
 
@@ -353,12 +378,13 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`stores/${this.id}?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`stores/${this.id}?nopage=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
           self.address = `${result.province}${result.city}${result.dist}${result.address}`
           self.formItem = result
           self.push_money = result.push_money
+          self.coaches = result.coaches
           self.loading = false
           console.log(self.formItem)
         })

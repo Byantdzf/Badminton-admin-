@@ -63,7 +63,7 @@ export default {
           key: 'value'
         },
         {
-          title: '提成',
+          title: '提成比例（%）',
           align: 'center',
           width: 150,
           key: 'ratio'
