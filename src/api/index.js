@@ -21,11 +21,10 @@ uAxios.interceptors.response.use(response => {
   if (response.status === 200 && response.data.code === 2) { // token过期
     window.localStorage.removeItem('ACCESS_TOKEN')
     console.log(window.location)
-    alert('请重新登录')
     // window.location.href = '/login'
-    // this.$router.push({
-    //   name: 'login'
-    // })
+    this.$router.push({
+      name: 'login'
+    })
   } else if (response.status === 200 && response.data.code === 1) {
     return alert(response.data.message)
   }

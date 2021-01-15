@@ -26,14 +26,14 @@
           </Card>
           <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="exportFn()">导出</Button>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border  @on-selection-change="handleSelect"></Table>
-          <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
-            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
-              <Option value="启用" label="启用"></Option>
-              <Option value="禁用" label="禁用"></Option>
-            </Select>
-            <Button @click="batchFn()" >确定</Button>
-          </div>
+<!--          <div style="margin-top:16px;">-->
+<!--            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>-->
+<!--            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">-->
+<!--              <Option value="启用" label="启用"></Option>-->
+<!--              <Option value="禁用" label="禁用"></Option>-->
+<!--            </Select>-->
+<!--            <Button @click="batchFn()" >确定</Button>-->
+<!--          </div>-->
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
                 style="margin-top:30px;margin-bottom:30px;"  show-elevator></Page>
         </TabPane>
@@ -63,11 +63,11 @@ export default {
       id: '',
       ids: [],
       orgColumns: [
-        {
-          type: 'selection',
-          width: 60,
-          align: 'center'
-        },
+        // {
+        //   type: 'selection',
+        //   width: 60,
+        //   align: 'center'
+        // },
         {
           title: '用户ID',
           key: 'id',

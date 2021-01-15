@@ -6,7 +6,7 @@
           <Row :gutter="22">
             <Col span="18">
               <Card title="基础信息">
-                <FormItem label="课程名称：" prop="account">
+                <FormItem label="门店名称：" prop="account">
                   <Input v-model="formItem.name" placeholder="请输入..." style="max-width:220px;"></Input>
                 </FormItem>
                 <FormItem label="门店地址：" prop="account">
@@ -20,12 +20,12 @@
                     <Option v-for="item in userList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                   </Select>
                 </FormItem>
-                <FormItem label="课程图片：" prop="account">
+                <FormItem label="门店图片：" prop="account">
                   <Card style="max-width: 420px;">
                     <uploadImage v-on:uploadPictures="uploadPicture" :pic="formItem.pic"></uploadImage>
                   </Card>
                 </FormItem>
-                <FormItem label="课程详请信息：" prop="detail">
+                <FormItem label="门店介绍信息：" prop="detail">
                   <tinymce-editor ref="editor"
                                   v-model="formItem.detail"
                                   style="max-width: 600px;height: 200px;">

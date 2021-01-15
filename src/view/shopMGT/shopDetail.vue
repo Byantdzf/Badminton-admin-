@@ -6,7 +6,7 @@
           <Row :gutter="22">
             <Col span="18">
               <Card title="基础信息">
-                <FormItem label="课程名称：" prop="account">
+                <FormItem label="门店名称：" prop="account">
                   <Input v-model="formItem.name" placeholder="请输入..." style="max-width:220px;"></Input>
                 </FormItem>
                 <FormItem label="门店地址：" prop="account">
@@ -15,20 +15,28 @@
                     <Button type="primary" @click="showMapModel = true">地图定位</Button>
                   </Row>
                 </FormItem>
-                <FormItem label="所属店长：" prop="account">
-                  <Select v-model="formItem.user_id" style="width: 220px;" filterable @on-query-change="getGropData">
-                    <Option v-for="item in userList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                  </Select>
+                <FormItem label="门店店长：" prop="account">
+                  <span v-if="!showEdit">
+                    <Input v-model="formItem.manager_name" placeholder="店长" style="max-width:220px;margin-right: 22px;"></Input>
+                    <Button type="primary" @click="showEdit = true">重新选择</Button>
+                  </span>
+                  <span v-else>
+                    <Select v-model="formItem.user_id" style="width: 220px;margin-right: 22px;" filterable @on-query-change="getGropData">
+                      <Option v-for="item in userList" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                    </Select>
+                    <Button type="" @click="showEdit = true">取消</Button>
+                  </span>
+
                 </FormItem>
-                <FormItem label="课程图片：" prop="account">
+                <FormItem label="门店图片：" prop="account">
                   <Card style="max-width: 420px;">
                     <uploadImage v-on:uploadPictures="uploadPicture" :pic="formItem.pic"></uploadImage>
                   </Card>
                 </FormItem>
-                <FormItem label="课程详请信息：" prop="detail">
+                <FormItem label="门店详请介绍：" prop="detail">
                   <tinymce-editor ref="editor"
                                   v-model="formItem.detail"
-                                  style="max-width: 600px;height: 200px;">
+                                  style="width: 400px;">
                   </tinymce-editor>
                 </FormItem>
                 <FormItem label="营业执照：" prop="business_license">
@@ -36,6 +44,10 @@
                     <uploadImage v-on:uploadPictures="uploadPictureV2" :pic="formItem.business_license"></uploadImage>
                   </Card>
                 </FormItem>
+              </Card>
+              <Card title="门店课程" style="margin-top: 22px;">
+                <Button type="primary" style="margin-bottom: 22px; " @click="setFn()">新建课程</Button>
+                <Table border :columns="courseList" :data="courseData"></Table>
               </Card>
               <Card title="门店提成记录" style="margin-top: 22px;">
                 <Button type="primary" style="margin-bottom: 22px; " @click="setFn()">设置提成</Button>
@@ -57,6 +69,9 @@
         </FormItem>
         <FormItem label="教练昵称：">
           <Input v-model="coachName" placeholder="请输入昵称" style="max-width:220px;"></Input>
+        </FormItem>
+        <FormItem label="教练简介：">
+          <Input v-model="intro" placeholder="请输入昵称" style="max-width:220px;"></Input>
         </FormItem>
         <FormItem label="教练手机号：">
           <Input v-model="coachMobile" placeholder="请输入昵称" style="max-width:220px;"></Input>
@@ -97,10 +112,12 @@ export default {
       addCoach: false,
       coachPic: '',
       coachName: '',
+      intro: '',
       coachMobile: '',
       coachPassword: '',
       userID: '',
       showMapModel: false,
+      showEdit: false,
       userList: [],
       poster: '',
       shopDetail: {},
@@ -113,6 +130,8 @@ export default {
         { title: '10次卡' },
         { title: '3次卡' }
       ],
+      courseData: {},
+      courseList: {},
       id: '',
       modal: false,
       modal1: false,
@@ -158,8 +177,8 @@ export default {
           align: 'center'
         },
         {
-          title: '手机号',
-          key: 'mobile',
+          title: '简介',
+          key: 'intro',
           align: 'center'
         },
         {
@@ -295,6 +314,7 @@ export default {
       let data = {
         photo: this.coachPic,
         name: this.coachName,
+        intro: this.intro,
         mobile: this.coachMobile,
         password: this.coachPassword
       }

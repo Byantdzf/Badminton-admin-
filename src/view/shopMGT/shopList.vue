@@ -146,7 +146,7 @@ export default {
                   click: () => {
                     this.$Modal.confirm({
                       title: '温馨提示',
-                      content: `<p>你确定删除改门店吗？</p>`,
+                      content: `<p>你确定删除该门店吗？</p>`,
                       onOk: () => {
                         uAxios.delete(`stores/${params.row.id}`)
                           .then(res => {
