@@ -21,8 +21,8 @@
                     <Button type="primary" @click="showEdit = true">重新选择</Button>
                   </span>
                   <span v-else>
-                    <Select v-model="formItem.user_id" style="width: 220px;margin-right: 22px;" filterable @on-query-change="getGropData">
-                      <Option v-for="item in userList" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                    <Select v-model="formItem.user_id" style="width: 220px;margin-right: 22px;" filterable @on-query-change="getGropData" >
+                      <Option v-for="item in userList" :value="item.id" :key="item.id" >{{ item.name }}</Option>
                     </Select>
                     <Button type="" @click="showEdit = true">取消</Button>
                   </span>
@@ -49,12 +49,16 @@
                 <Button type="primary" style="margin-bottom: 22px; " @click="setFn()">新建课程</Button>
                 <Table border :columns="courseList" :data="courseData"></Table>
               </Card>
+              <Card title="预约券列表" style="margin-top: 22px;">
+                <Button type="primary" style="margin-bottom: 22px; " @click="showTicketFn()">新增预约券</Button>
+                <Table border :columns="ticketColumns" :data="tickets"></Table>
+              </Card>
               <Card title="门店提成记录" style="margin-top: 22px;">
                 <Button type="primary" style="margin-bottom: 22px; " @click="setFn()">设置提成</Button>
                 <Table border :columns="columns" :data="push_money"></Table>
               </Card>
               <Card title="教练列表" style="margin-top: 22px;">
-                <Button type="primary" style="margin-bottom: 22px; " @click="addCoach=!addCoach">新增教练</Button>
+                <Button type="primary" style="margin-bottom: 22px; " @click="showCoachFn()">新增教练</Button>
                 <Table border :columns="coachColumns" :data="coaches"></Table>
               </Card>
             </Col>
@@ -62,7 +66,7 @@
         </Form>
       </TabPane>
     </Tabs>
-    <Modal v-model="addCoach" width="460" title="新增门店教练" @on-ok="addCoachFn" >
+    <Modal v-model="addCoach" width="460" :title="coacheTitle" @on-ok="addCoachFn" >
       <Form :label-width="100" >
         <FormItem label="教练头像：">
           <uploadImage v-on:uploadPictures="uploadCoachPic" :pic="coachPic"></uploadImage>
@@ -71,13 +75,23 @@
           <Input v-model="coachName" placeholder="请输入昵称" style="max-width:220px;"></Input>
         </FormItem>
         <FormItem label="教练简介：">
-          <Input v-model="intro" placeholder="请输入昵称" style="max-width:220px;"></Input>
+          <Input v-model="coachIntro" placeholder="请输入昵称" style="max-width:220px;"></Input>
         </FormItem>
-        <FormItem label="教练手机号：">
-          <Input v-model="coachMobile" placeholder="请输入昵称" style="max-width:220px;"></Input>
+      </Form>
+    </Modal>
+    <Modal v-model="showTicket" width="460" :title="coacheTitle" @on-ok="addTitleFn" >
+      <Form :label-width="100" >
+        <FormItem label="卡券名称：">
+          <Input v-model="TicketData.name" placeholder="请输入卡券名称" style="max-width:220px;"></Input>
         </FormItem>
-        <FormItem label="登录密码：">
-          <Input v-model="coachPassword" placeholder="请输入登录密码" style="max-width:220px;"></Input>
+        <FormItem label="预约次数：">
+          <Input v-model="TicketData.total_num" placeholder="请输入可预约次数" style="max-width:220px;"></Input>
+        </FormItem>
+        <FormItem label="有效天数：">
+          <Input v-model="TicketData.valid_days" placeholder="请输入有效天数" style="max-width:220px;"></Input>
+        </FormItem>
+        <FormItem label="实付价格：">
+          <Input v-model="TicketData.price" placeholder="请输入价格" style="max-width:220px;"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -110,9 +124,18 @@ export default {
   data () {
     return {
       addCoach: false,
+      showTicket: false,
+      TicketData: {
+        name: '',
+        total_num: '',
+        valid_days: '',
+        price: ''
+      },
       coachPic: '',
+      coachId: '',
+      ticketId: '',
       coachName: '',
-      intro: '',
+      coachIntro: '',
       coachMobile: '',
       coachPassword: '',
       userID: '',
@@ -125,13 +148,89 @@ export default {
       push_money: [],
       coaches: [],
       title: '新增门店详情',
+      coacheTitle: '新增门店教练',
       filePath: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
       sizeList: [
         { title: '10次卡' },
         { title: '3次卡' }
       ],
-      courseData: {},
-      courseList: {},
+      courseData: [],
+      courseList: [],
+      tickets: [],
+      ticketColumns: [
+        {
+          title: '名称',
+          key: 'name',
+          align: 'center'
+        },
+        {
+          title: '总次数',
+          key: 'total_num',
+          align: 'center'
+        },
+        {
+          title: '有效天数',
+          key: 'valid_days',
+          align: 'center'
+        },
+        {
+          title: '价格',
+          key: 'price',
+          align: 'center'
+        },
+        {
+          title: '创建时间',
+          key: 'created_at',
+          align: 'center'
+        },
+        {
+          title: '操作',
+          key: 'id',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Button', {
+                props: {
+                  type: 'primary'
+                },
+                style: {
+                  marginRight: '8px'
+                },
+                on: {
+                  click: () => {
+                    this.TicketData.name = params.row.name
+                    this.TicketData.total_num = params.row.total_num
+                    this.TicketData.valid_days = params.row.valid_days
+                    this.TicketData.price = params.row.price
+                    this.ticketId = params.row.id
+                    this.showTicket = !this.showTicket
+                    console.log(this.coachId)
+                  }
+                }
+              }, '编辑'),
+              h('Button', {
+                props: {
+                  type: 'error'
+                },
+                on: {
+                  click: () => {
+                    this.$Modal.confirm({
+                      title: '温馨提示',
+                      content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除?</p>`,
+                      onOk: () => {
+                        this.removeTicket(params.row.id, params.index)
+                      },
+                      onCancel: () => {
+                        console.log('点击了取消')
+                      }
+                    })
+                  }
+                }
+              }, '删除')
+            ])
+          }
+        }
+      ],
       id: '',
       modal: false,
       modal1: false,
@@ -185,6 +284,53 @@ export default {
           title: '创建时间',
           key: 'created_at',
           align: 'center'
+        },
+        {
+          title: '操作',
+          key: 'id',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Button', {
+                props: {
+                  type: 'primary'
+                },
+                style: {
+                  marginRight: '8px'
+                },
+                on: {
+                  click: () => {
+                    this.coacheTitle = '编辑门店教练'
+                    this.coachName = params.row.name
+                    this.coachPic = params.row.photo
+                    this.coachIntro = params.row.intro
+                    this.coachId = params.row.id
+                    this.addCoach = !this.addCoach
+                    console.log(this.coachId)
+                  }
+                }
+              }, '编辑'),
+              h('Button', {
+                props: {
+                  type: 'error'
+                },
+                on: {
+                  click: () => {
+                    this.$Modal.confirm({
+                      title: '温馨提示',
+                      content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除?</p>`,
+                      onOk: () => {
+                        this.removeCoach(params.row.id, params.index)
+                      },
+                      onCancel: () => {
+                        console.log('点击了取消')
+                      }
+                    })
+                  }
+                }
+              }, '删除')
+            ])
+          }
         }
       ],
       columns: [
@@ -226,6 +372,17 @@ export default {
     }
   },
   methods: {
+    showCoachFn () {
+      this.coachName = ''
+      this.coachPic = ''
+      this.coachIntro = ''
+      this.coachId = 0
+      this.coacheTitle = '新增门店教练'
+      this.addCoach = !this.addCoach
+    },
+    showTicketFn () {
+      this.showTicket = !this.showTicket
+    },
     setFn () {
       this.$router.push({
         name: 'shopDeduct',
@@ -247,6 +404,26 @@ export default {
             setTimeout(() => {
               this.$router.go(-1) // 返回上一层
             }, 800)
+          }
+        })
+    },
+    removeCoach (id) { // 删除教练
+      let vm = this
+      uAxios.delete(`stores/coaches/${id}`)
+        .then(res => {
+          if (res.data.code == 0) {
+            vm.$Message.success('删除成功!')
+            vm.getlist(1)
+          }
+        })
+    },
+    removeTicket (id) { // 删除预约券
+      let vm = this
+      uAxios.delete(`course/tickets?store_id=${id}`)
+        .then(res => {
+          if (res.data.code == 0) {
+            vm.$Message.success('删除成功!')
+            vm.getTickets(1)
           }
         })
     },
@@ -310,21 +487,56 @@ export default {
     ok () {
       this.$Message.info('Clicked ok')
     },
+    addTitleFn () { // 添加预约券
+      let data = {
+        name: this.TicketData.name,
+        total_num: this.TicketData.total_num,
+        valid_days: this.TicketData.valid_days,
+        price: this.TicketData.price,
+        store_id: this.id,
+        is_show: 1
+      }
+      if (this.ticketId) {
+        uAxios.put(`course/tickets`, data)
+          .then(res => {
+            let result = res.data.data
+            console.log(result)
+            this.$Message.success('修改成功')
+            this.getTickets(1)
+          })
+      } else {
+        uAxios.post(`course/tickets`, data)
+          .then(res => {
+            let result = res.data.data
+            console.log(result)
+            this.$Message.success('添加成功')
+            this.getTickets(1)
+          })
+      }
+    },
     addCoachFn () { // 添加教练
       let data = {
         photo: this.coachPic,
         name: this.coachName,
-        intro: this.intro,
-        mobile: this.coachMobile,
-        password: this.coachPassword
+        intro: this.coachIntro
       }
-      uAxios.post(`stores/${this.id}/coach`, data)
-        .then(res => {
-          let result = res.data.data
-          console.log(result)
-          this.$Message.success('添加成功')
-          this.getlist(1)
-        })
+      if (this.coachId) {
+        uAxios.put(`stores/coaches/${this.coachId}`, data)
+          .then(res => {
+            let result = res.data.data
+            console.log(result)
+            this.$Message.success('修改成功')
+            this.getlist(1)
+          })
+      } else {
+        uAxios.post(`stores/${this.id}/coach`, data)
+          .then(res => {
+            let result = res.data.data
+            console.log(result)
+            this.$Message.success('添加成功')
+            this.getlist(1)
+          })
+      }
     },
 
     cancel () {
@@ -409,6 +621,16 @@ export default {
           console.log(self.formItem)
         })
     },
+    getTickets (page) {
+      let self = this
+      self.loading = true
+      uAxios.get(`course/tickets?store_id=${this.id}&nopage=1`)
+        .then(res => {
+          let result = res.data.data
+          self.tickets = result
+          console.log(self.tickets)
+        })
+    },
     handleSearch () {
       this.getlist(1)
     }
@@ -417,6 +639,7 @@ export default {
     if (this.$route.query.id) {
       this.id = this.$route.query.id
       this.getlist(1)
+      this.getTickets(1)
       this.title = '编辑门店详情'
     }
     console.log(this.$route.query)

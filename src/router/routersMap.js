@@ -68,6 +68,18 @@ export const staticRouters = [
         component: () => import('@/view/systemMGT/roleList.vue')
       },
       {
+        name: 'BannaList',
+        path: 'BannaList',
+        icon: 'ios-contacts',
+        meta: {
+          // access: ['paas_admin'],
+          hideInMenu: false,
+          notCache: true,
+          title: '首页轮播管理'
+        },
+        component: () => import('@/view/systemMGT/BannaList.vue')
+      },
+      {
         name: 'feedbackList',
         path: 'feedbackList',
         icon: 'ios-contacts',
