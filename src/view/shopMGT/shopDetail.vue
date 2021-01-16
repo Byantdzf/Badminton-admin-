@@ -44,9 +44,11 @@
                     <uploadImage v-on:uploadPictures="uploadPictureV2" :pic="formItem.business_license"></uploadImage>
                   </Card>
                 </FormItem>
+                <Button @click="getBack" style="margin: 22px 12px;">返回</Button>
+                <Button type="primary" @click="saveFn" >保存</Button>
               </Card>
               <Card title="门店课程" style="margin-top: 22px;">
-                <Button type="primary" style="margin-bottom: 22px; " @click="setFn()">新建课程</Button>
+                <Button type="primary" style="margin-bottom: 22px; " @click="addCourseFn()">新建课程</Button>
                 <Table border :columns="courseList" :data="courseData"></Table>
               </Card>
               <Card title="预约券列表" style="margin-top: 22px;">
@@ -98,8 +100,6 @@
     <Modal v-model="showMapModel" width="860" title="活动地址" @on-ok="ok">
       <Geolocation  @getLocation="getLocation"  @hideModal="hideModal" :setLocation="setLocation" ></Geolocation>
     </Modal>
-    <Button type="primary" @click="saveFn" style="margin-right: 12px;">保存</Button>
-    <Button @click="getBack" style="margin: 22px 0">返回</Button>
   </Card>
 </template>
 
@@ -155,7 +155,80 @@ export default {
         { title: '3次卡' }
       ],
       courseData: [],
-      courseList: [],
+      courseList: [
+        {
+          title: '名称',
+          key: 'name',
+          align: 'center'
+        },
+        {
+          title: '总次数',
+          key: 'total_num',
+          align: 'center'
+        },
+        {
+          title: '有效天数',
+          key: 'valid_days',
+          align: 'center'
+        },
+        {
+          title: '价格',
+          key: 'price',
+          align: 'center'
+        },
+        {
+          title: '创建时间',
+          key: 'created_at',
+          align: 'center'
+        },
+        {
+          title: '操作',
+          key: 'id',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Button', {
+                props: {
+                  type: 'primary'
+                },
+                style: {
+                  marginRight: '8px'
+                },
+                on: {
+                  click: () => {
+                    this.TicketData.name = params.row.name
+                    this.TicketData.total_num = params.row.total_num
+                    this.TicketData.valid_days = params.row.valid_days
+                    this.TicketData.price = params.row.price
+                    this.ticketId = params.row.id
+                    this.showTicket = !this.showTicket
+                    console.log(this.coachId)
+                  }
+                }
+              }, '编辑'),
+              h('Button', {
+                props: {
+                  type: 'error'
+                },
+                on: {
+                  click: () => {
+                    this.$Modal.confirm({
+                      title: '温馨提示',
+                      content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除?</p>`,
+                      onOk: () => {
+                        this.removeTicket(params.row.id, params.index)
+                      },
+                      onCancel: () => {
+                        console.log('点击了取消')
+                      }
+                    })
+                  }
+                }
+              }, '删除')
+            ])
+          }
+        }
+      ],
       tickets: [],
       ticketColumns: [
         {
@@ -383,9 +456,9 @@ export default {
     showTicketFn () {
       this.showTicket = !this.showTicket
     },
-    setFn () {
+    addCourseFn () {
       this.$router.push({
-        name: 'shopDeduct',
+        name: 'editCourseDetailTeam',
         query: { id: this.id }
       })
     },
@@ -621,6 +694,16 @@ export default {
           console.log(self.formItem)
         })
     },
+    getCourseData (page) {
+      let self = this
+      self.loading = true
+      uAxios.get(`courses?store_id=${this.id}&nopage=1`)
+        .then(res => {
+          let result = res.data.data
+          self.courseData = result
+          console.log(self.tickets)
+        })
+    },
     getTickets (page) {
       let self = this
       self.loading = true
@@ -640,6 +723,7 @@ export default {
       this.id = this.$route.query.id
       this.getlist(1)
       this.getTickets(1)
+      this.getCourseData(1)
       this.title = '编辑门店详情'
     }
     console.log(this.$route.query)
