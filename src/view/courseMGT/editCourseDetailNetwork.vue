@@ -2,31 +2,57 @@
   <Card>
     <Tabs style="margin-top: 12px;">
       <TabPane :label="title" name="adminList">
-        <Form :model="formItem" :label-width="100">
+        <Form :model="formData" :label-width="100">
           <Row :gutter="22">
             <Col span="12">
               <Card title="基础信息">
                 <FormItem label="课程名称：" prop="account">
-                  <Input v-model="formItem.input" placeholder="请输入..." style="max-width:220px;"></Input>
+                  <Input v-model="formData.name" placeholder="请输入..." style="max-width:220px;"></Input>
                 </FormItem>
-                <FormItem label="所属球场：" prop="account">
-                  <Select v-model="formItem.ballPark" style="width:100px;margin-right: 16px;">
-                    <Option value="球场名字" label="球场名字"></Option>
-                    <Option value="球场名字1" label="球场名字1"></Option>
-                  </Select>
+                <FormItem label="课程分类：" prop="account">
+                  <span v-if="category_name">
+                    <Input v-model="category_name" placeholder="店长" style="max-width:220px;margin-right: 22px;"></Input>
+                    <Button type="primary" @click="category_name = ''">重新选择</Button>
+                  </span>
+                  <span v-else>
+                    <Select v-model="formData.category_id" style="width: 220px;margin-right: 22px;" filterable @on-query-change="getClassData" >
+                      <Option v-for="item in classList" :value="item.id" :key="item.id" >{{ item.name }}</Option>
+                    </Select>
+                  </span>
                 </FormItem>
-                <FormItem label="课程图片：" prop="account">
-                  <img
-                    src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg"
-                    alt="" width="140">
-                  <Button style="width: 58px;height:58px;line-height: 48px; margin-left: 22px;margin-top: -42px;">
-                    <Icon type="ios-images" size="28"/>
-                  </Button>
+                <FormItem label="状态：" prop="account">
+                  <RadioGroup v-model="formData.is_show">
+                    <Radio label="1">显示</Radio>
+                    <Radio label="0">隐藏</Radio>
+                  </RadioGroup>
                 </FormItem>
+                <FormItem label="网课图片：" prop="account">
+                  <Card style="max-width: 420px;">
+                    <uploadImage v-on:uploadPictures="uploadPicture" :pic="formData.pic"></uploadImage>
+                  </Card>
+                </FormItem>
+                <span v-if="formData.video_id">
+                  <FormItem label="课程视频：" prop="account">
+                  <div class='videoStyle'>
+                    <video-player class="video-player vjs-custom-skin"
+                                  ref="videoPlayer"
+                                  :playsinline="true"
+                                  :options="playerOptions">
+                    </video-player>
+                  </div>
+                </FormItem>
+                </span>
+                <span v-else>
+                  <FormItem label="网课视频：" prop="account">
+                    <Card style="max-width: 420px;">
+                      <uploadImage v-on:uploadPictures="uploadVideo" :pic="formData.video_id"></uploadImage>
+                    </Card>
+                </FormItem>
+                </span>
                 <FormItem label="课程详请信息：" prop="account">
                   <tinymce-editor ref="editor"
-                                  v-model="formItem.msg"
-                                  style="max-width: 600px;height: 200px;">
+                                  v-model="formData.detail"
+                                  style="width: 400px;">
                   </tinymce-editor>
                 </FormItem>
               </Card>
@@ -42,35 +68,45 @@
 
 <script>
 import uAxios from '../../api/index'
-// import config from '../../api/config'
 import dropdown from '../components/dropdown'
-// import Cookies from 'js-cookie'
 import TinymceEditor from '../../../public/richEncapsulation'
+import uploadImage from '../components/uploadImage'
 
 export default {
   components: {
     dropdown,
-    TinymceEditor
+    TinymceEditor,
+    uploadImage
   },
   data () {
     return {
-      title: '新增网课详情',
-      sizeList: [
-        {title: '10次卡'},
-        {title: '3次卡'}
-      ],
+      title: '新增网课',
+      classList: [],
       modal: false,
+      category_name: '',
+      id: '',
       modal1: false,
-      formItem1: {
-        name: '',
-        price: '',
-        num: ''
-      },
-      formItem2: {
-        name: '',
-        day: '',
-        time: '',
-        num: ''
+      playerOptions: {
+        playbackRates: [0.5, 1.0, 1.5, 2.0], // 可选的播放速度
+        autoplay: false, // 如果为true,浏览器准备好时开始回放。
+        muted: false, // 默认情况下将会消除任何音频。
+        loop: false, // 是否视频一结束就重新开始。
+        preload: 'auto', // 建议浏览器在<video>加载元素后是否应该开始下载视频数据。auto浏览器选择最佳行为,立即开始加载视频（如果浏览器支持）
+        language: 'zh-CN',
+        aspectRatio: '16:9', // 将播放器置于流畅模式，并在计算播放器的动态大小时使用该值。值应该代表一个比例 - 用冒号分隔的两个数字（例如"16:9"或"4:3"）
+        fluid: true, // 当true时，Video.js player将拥有流体大小。换句话说，它将按比例缩放以适应其容器。
+        sources: [{
+          type: 'video/mp4', // 类型
+          src: '' // url地址
+        }],
+        poster: '', // 封面地址
+        notSupportedMessage: '此视频暂无法播放，请稍后再试', // 允许覆盖Video.js无法播放媒体源时显示的默认信息。
+        controlBar: {
+          timeDivider: true, // 当前时间和持续时间的分隔符
+          durationDisplay: true, // 显示持续时间
+          remainingTimeDisplay: false, // 是否显示剩余时间功能
+          fullscreenToggle: true // 是否显示全屏按钮
+        }
       },
       columns: [
         {
@@ -101,60 +137,25 @@ export default {
           price: '4.00'
         }
       ],
-      columns1: [
-        {
-          title: '课时',
-          key: 'name',
-          align: 'center'
-        },
-        {
-          title: '时间',
-          key: 'time',
-          align: 'center'
-        },
-        {
-          title: '有效期（天）',
-          key: 'day',
-          align: 'center'
-        },
-        {
-          title: '上课人数',
-          key: 'num',
-          align: 'center'
-        }
-      ],
-      data2: [
-        {
-          name: '第一课时',
-          num: 18,
-          day: '12',
-          time: '2020-10-12 8:00 ~ 2020-10-15 12:00'
-        },
-        {
-          name: '第二课时',
-          num: 12,
-          day: '12',
-          time: '2020-10-12 8:00 ~ 2020-10-15 12:00'
-        }
-      ],
-      formItem: {
+      formData: {
         name: '',
-        state: '',
-        ballPark: '',
-        msg: '其实加个接口不贵，然而思路上有问题。现在国内这些都是高端一款低端一款，加一个输出口的话，高端那个就尴尬了。还有就是这个麦克风阵列他们是测好的，你接到自己的喇叭上，怎么摆他们就管不了了，到时候你喊它未必答应，他们不希望你归罪于产品。亚马逊的dot是带输出的，但是还需要复杂的上网流程，很烦。还有一点，现在这些国内的智能音响基本属于赔钱卖，如果真的就值这个价，漫步者的千元系列应该自己就把这功能加进去了。所以还需要等一段日子。',
-        coach: '',
-        select: '',
-        radio: 'male',
-        checkbox: [],
-        switch: true,
-        date: '',
-        time: '',
-        slider: [20, 50],
-        textarea: ''
+        is_show: '1',
+        type: 'online',
+        category_id: '',
+        video_id: '',
+        detail: '',
+        pic: ''
       }
     }
   },
   methods: {
+    uploadPicture (image) { // 单
+      this.formData.pic = image //
+    },
+    uploadVideo (image) { // 单
+      this.formData.video_id = image //
+      this.playerOptions.sources[0].src = image
+    },
     addStyle () {
       this.modal = true
     },
@@ -217,10 +218,35 @@ export default {
       this.$router.back(-1)
     },
     saveFn () {
-      this.$Message.info('保存成功')
-      setTimeout(() => {
-        this.$router.back(-1)
-      }, 800)
+      let vm = this
+      console.log(vm.formData)
+      for (let item in vm.formData) {
+        if (!vm.formData[item]) {
+          return this.$Message.error('你有信息项未填写，请先填写!')
+        }
+      }
+      console.log(vm.formData)
+      if (this.id) {
+        uAxios.put(`courses/${this.id}`, vm.formData)
+          .then(res => {
+            if (res.data.code == 0) {
+              this.$Message.success('修改成功!')
+              setTimeout(() => {
+                this.$router.go(-1) // 返回上一层
+              }, 800)
+            }
+          })
+      } else {
+        uAxios.post(`courses`, vm.formData)
+          .then(res => {
+            if (res.data.code == 0) {
+              this.$Message.success('创建成功!')
+              setTimeout(() => {
+                this.$router.go(-1) // 返回上一层
+              }, 800)
+            }
+          })
+      }
     },
     handleReset (name) {
       this.$refs[name].resetFields()
@@ -235,25 +261,48 @@ export default {
     handlePage (num) { // 分页
       this.getlist(num)
     },
-    getlist (page) {
+    getCoursesData (value) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      // const msg = self.$Message.loading('正在加载中...', 0)
+      uAxios.get(`courses/${self.id}?keyword=${value}&nopage=1`)
         .then(res => {
+          self.loading = false
           let result = res.data.data
-          if (result.data) {
-            self.information = result.data.map((item) => {
-              let {user} = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
+          console.log(result)
+          self.formData = {
+            name: result.name,
+            is_show: result.is_show,
+            type: result.type,
+            category_id: result.category_id,
+            video_id: result.video_id,
+            detail: result.detail,
+            pic: result.pic
           }
+          self.category_name = result.category.name
+          self.playerOptions.sources[0].src = result.video_id
+        })
+        .catch(error => {
+          self.loading = false
+        })
+    },
+    getClassData (value) {
+      let self = this
+      self.loading = true
+      const msg = self.$Message.loading('正在加载中...', 0)
+      uAxios.get(`courses/categories?keyword=${value}&nopage=1`)
+        .then(res => {
+          setTimeout(msg, 3000)
+          self.loading = false
+          let result = res.data.data.data
+          this.classList = result.map((item) => {
+            return {
+              name: item.name,
+              id: item.id
+            }
+          })
+        })
+        .catch(error => {
           self.loading = false
         })
     },
@@ -262,8 +311,11 @@ export default {
     }
   },
   mounted () {
-    if (this.$route.query.id) this.title = '编辑网课详情'
-    this.getlist(1)
+    if (this.$route.query.id) {
+      this.title = '编辑网课详情'
+      this.id = this.$route.query.id
+      this.getCoursesData(1)
+    }
     console.log(this.$route.query)
   }
 }
@@ -288,6 +340,12 @@ export default {
 
 .inlineBlock {
   display: inline-block
+}
+.videoStyle {
+  //margin: 42px;
+  width: 320px;
+  height: auto;
+  box-shadow: 1px 1px 12px #afaeae;
 }
 
 .ivu-tree-title-selected, .ivu-tree-title-selected:hover {

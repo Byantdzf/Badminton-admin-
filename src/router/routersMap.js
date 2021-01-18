@@ -257,7 +257,7 @@ export const staticRouters = [
   },
   {
     path: '/',
-    name: '课程管理',
+    name: '网课管理',
     meta: {
       access: [],
       notCache: true, hideInMenu: false,

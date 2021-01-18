@@ -55,7 +55,10 @@
           <Input v-model="formItem2.name" placeholder="请输入..." style="width:200px;"></Input>
         </FormItem>
         <FormItem label="时间：">
-          <DatePicker type="datetimerange" placeholder="选择查询日期" style="width:200px;"></DatePicker>
+          <DatePicker type="datetimerange" v-model="formItem2.day" placeholder="选择查询日期" style="width:200px;"></DatePicker>
+        </FormItem>
+        <FormItem label="有效天数">
+          <Input v-model="formItem2.valid_day"  placeholder="请输入..." style="width:200px;"></Input>
         </FormItem>
         <FormItem label="上课人数：">
           <Input v-model="formItem2.num" placeholder="请输入..." style="width:200px;"></Input>
@@ -86,7 +89,9 @@ export default {
       formItem2: {
         name: '',
         day: '',
-        time: '',
+        start_time: '',
+        end_time: '',
+        valid_day: '',
         num: ''
       },
       columns: [
@@ -96,14 +101,57 @@ export default {
           align: 'center'
         },
         {
-          title: '时间',
+          title: '开始时间',
           key: 'time',
+          align: 'center'
+        },
+        {
+          title: '结束时间',
+          key: 'time',
+          align: 'center'
+        },
+        {
+          title: '有效天数',
+          key: 'num',
           align: 'center'
         },
         {
           title: '上课人数',
           key: 'num',
           align: 'center'
+        },
+        {
+          title: '已经预约',
+          key: 'num',
+          align: 'center'
+        },
+        {
+          title: '操作',
+          key: 'id',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Button', {
+                props: {
+                  type: 'error'
+                },
+                on: {
+                  click: () => {
+                    this.$Modal.confirm({
+                      title: '温馨提示',
+                      content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除?</p>`,
+                      onOk: () => {
+                        this.removeFn(params.row.id, params.index)
+                      },
+                      onCancel: () => {
+                        console.log('点击了取消')
+                      }
+                    })
+                  }
+                }
+              }, '删除')
+            ])
+          }
         }
       ],
       data: [
@@ -111,7 +159,7 @@ export default {
           name: '第一课时',
           num: 18,
           day: '12',
-          time: '2020-10-12 8:00 ~ 2020-10-15 12:00'
+          time: '2020-10-12 8:00'
         },
         {
           name: '第二课时',
@@ -129,7 +177,7 @@ export default {
         store_name: '', // 门店名称
         store_id: '', // 门店ID
         is_show: '1', // 是否展示，0：否，1：是
-        detail: '其实加个接口不贵，然而思路上有问题。现在国内这些都是高端一款低端一款，加一个输出口的话，高端那个就尴尬了。还有就是这个麦克风阵列他们是测好的，你接到自己的喇叭上，怎么摆他们就管不了了，到时候你喊它未必答应，他们不希望你归罪于产品。亚马逊的dot是带输出的，但是还需要复杂的上网流程，很烦。还有一点，现在这些国内的智能音响基本属于赔钱卖，如果真的就值这个价，漫步者的千元系列应该自己就把这功能加进去了。所以还需要等一段日子。'
+        detail: ''
       }
     }
   },
@@ -137,8 +185,64 @@ export default {
     getBack () {
       this.$router.back(-1)
     },
+    removeFn (id) { // 删除课表
+      let vm = this
+      uAxios.delete(`courses/schedules/${id}`)
+        .then(res => {
+          if (res.data.code == 0) {
+            vm.$Message.success('删除成功!')
+            vm.getlist(1)
+          }
+        })
+    },
+    format (time, format) {
+      let t = new Date(time)
+      let tf = function (i) {
+        return (i < 10 ? '0' : '') + i
+      }
+      return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+          case 'yyyy':
+            return tf(t.getFullYear())
+            break
+          case 'MM':
+            return tf(t.getMonth() + 1)
+            break
+          case 'mm':
+            return tf(t.getMinutes())
+            break
+          case 'dd':
+            return tf(t.getDate())
+            break
+          case 'HH':
+            return tf(t.getHours())
+            break
+          case 'ss':
+            return tf(t.getSeconds())
+            break
+        }
+      })
+    },
     ok () {
-      this.$Message.info('Clicked ok')
+      let self = this
+      self.loading = true
+      // console.log(this.dateFormat(this.formItem2.day[0]))
+      if (this.formItem2.day[0] && this.formItem2.day[1]) {
+        this.formItem2.start_time = this.format(this.formItem2.day[0], 'yyyy-MM-dd HH:ss')
+        this.formItem2.end_time = this.format(this.formItem2.day[1], 'yyyy-MM-dd HH:ss')
+      }
+      for (let item in self.formItem2) {
+        if (!self.formItem2[item]) {
+          return this.$Message.error('你有信息项未填写，请先填写!')
+        }
+      }
+      // console.log(this.formItem2)
+      uAxios.post(`courses/${self.courseId}/schedules`, this.formItem2)
+        .then(res => {
+          let result = res.data.data
+          console.log(result)
+          this.$Message.success('新增成功!')
+        })
     },
     cancel () {
       this.$Message.info('Clicked cancel')
@@ -159,17 +263,21 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`courses/${self.courseId}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
-          if (result.data) {
-            self.information = result.data.map((item) => {
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
+          console.log(result)
+          self.formData = {
+            type: 'league',
+            name: result.name,
+            pic: result.pic,
+            manager_name: result.store.manager_name, // 门店店长
+            store_name: result.store.name, // 门店名称
+            // manager_name: result.manager_name
+            store_id: result.store_id, // 门店ID
+            is_show: result.is_show, // 是否展示，0：否，1：是
+            detail: result.detail
           }
-          self.loading = false
         })
     },
     handleSearch () {
@@ -215,9 +323,11 @@ export default {
     if (this.$route.query.courseId) {
       this.courseId = this.$route.query.courseId
       this.title = '编辑团课详情'
+      this.getlist(1)
+    } else {
+      this.getStores(1)
     }
-    // this.getlist(1)
-    this.getStores(1)
+    //
     // console.log(this.$route.query)
   }
 }

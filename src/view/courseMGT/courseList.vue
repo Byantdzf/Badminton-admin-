@@ -1,60 +1,24 @@
 <template>
   <!--  课程列表-->
-  <Card title="课程列表">
-
+  <Card title="网课列表">
     <Card style="margin-bottom: 32px">
       <Row :gutter="20">
         <Col span="20">
-          <span>分类筛选：</span>
-          <Select v-model="SelectValue" style="width:200px;margin-right: 20px;">
-            <Option value="全部" label="全部"></Option>
-            <Option value="一级分类" label="一级分类"></Option>
-          </Select>
           <span>搜索关键词：</span>
           <Input
             v-model="searchKeyword"
             @on-enter="handleSearch"
             placeholder="课程ID/课程名称"
             style="width: 200px;"/>
-        </Col>
-        <Col span="20" style="margin-top: 32px">
-          <span>更新时间：</span>
-          <DatePicker type="datetimerange" placeholder="选择查询日期" v-model="beginDate"
-                      style="width:200px;margin-right: 20px;"></DatePicker>
-          <span>分类筛选：</span>
-          <Select v-model="SelectValue" style="width:200px;margin-left: 14px;">
-            <Option value="全部" label="全部"></Option>
-            <Option value="已上架" label="已上架"></Option>
-            <Option value="已下架" label="已下架"></Option>
-          </Select>
+          <Button type="warning" icon="ios-search" style="margin-left: 12px;" @click="handleSearch">搜索</Button>
         </Col>
       </Row>
-      <div style="margin-top: 22px;">
-        <Button type="warning" icon="ios-search" style="margin-left: 12px;" @click="handleSearch">搜索</Button>
-        <Button type="primary" style="margin-left: 12px; " @click="reset('addAuthorizationUser')">重置</Button>
-      </div>
     </Card>
     <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="gotoPage(type_name)">
-      新增
+      新增网课
     </Button>
-    <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="exportFn()">
-      导出
-    </Button>
-    <Tabs style="margin-top: 12px;" v-model="type" @on-click="TabFn">
-      <TabPane label="团课" name="league">
-        <Table :loading="loading" ref="selection" :columns="orgColumns" :data="information" style="width: 100%;"
-               border></Table>
-      </TabPane>
-      <TabPane label="网课" name="online">
-        <Table :loading="loading" ref="selection" :columns="orgColumns1" :data="information" style="width: 100%;"
-               border></Table>
-      </TabPane>
-      <TabPane label="体验课" name="trial">
-        <Table :loading="loading" ref="selection" :columns="orgColumns2" :data="information" style="width: 100%;"
-               border></Table>
-      </TabPane>
-    </Tabs>
-
+    <Table :loading="loading" ref="selection" :columns="orgColumns1" :data="information" style="width: 100%;"
+           border></Table>
     <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
           style="margin-top:30px;margin-bottom:30px;" show-elevator></Page>
 
@@ -73,9 +37,9 @@ export default {
   },
   data () {
     return {
-      type: 'league',
+      type: 'online',
       // trial:体验课，league:团课, online:网课
-      type_name: 'editCourseDetailTeam',
+      type_name: 'editCourseDetailNetwork', // online:网课
       beginDate: '', // 反馈时间
       CheckboxValue: false,
       SelectValue: '全部',
@@ -83,127 +47,6 @@ export default {
       searchKeyword: '', // 搜索
       orgTotal: 0, // 分页
       id: '',
-      orgColumns: [
-        {
-          title: '课程ID',
-          key: 'id',
-          align: 'center',
-          width: 100
-        },
-        {
-          title: '课程昵称',
-          key: 'name',
-          align: 'center',
-          width: 100
-        },
-        {
-          title: '课程图片',
-          render: (h, params) => {
-            return h('img', {
-              attrs: {
-                src: params.row.pic
-              },
-              style: {
-                width: '48px',
-                height: '48px',
-                marginTop: '6px',
-                border: '4px solid #f4f4f4'
-              },
-              on: {
-                click: () => {
-                }
-              }
-            })
-          },
-          width: 80,
-          align: 'center'
-        },
-        {
-          title: '销量',
-          key: 'pay_orders_count',
-          align: 'center',
-          editable: true
-        },
-        {
-          title: '销售价（元）',
-          key: 'sale_price',
-          align: 'center'
-        },
-        {
-          title: '状态',
-          align: 'center',
-          render: (h, params) => {
-            if (params.row.is_show == '1') {
-              return h('span', '已上架')
-            } else {
-              return h('span', '已下架')
-            }
-          }
-        },
-        {
-          title: '更新时间',
-          key: 'updated_at',
-          align: 'center'
-        },
-        {
-          title: '操作',
-          key: 'id',
-          width: 200,
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'courseDetailTeam',
-                      query: { id: params.row.id }
-                    })
-                  }
-                }
-              }, '查看'),
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'editCourseDetailTeam',
-                      query: { id: params.row.id }
-                    })
-                  }
-                }
-              }, '编辑'),
-              h('span', {
-                style: {
-                  color: '#ed4014',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定要${params.row.is_show == '1' ? '下架' : '上架'}该课程吗？</p>`,
-                      onOk: () => {
-                        this.operationFn(params.index)
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
-                  }
-                }
-              }, `${params.row.is_show == '1' ? '下架' : '上架'}`)
-            ])
-          }
-        }
-      ],
       orgColumns1: [
         {
           title: '课程ID',
@@ -214,8 +57,7 @@ export default {
         {
           title: '课程昵称',
           key: 'name',
-          align: 'center',
-          width: 100
+          align: 'center'
         },
         {
           title: '课程图片',
@@ -236,18 +78,21 @@ export default {
               }
             })
           },
-          width: 80,
+          width: 100,
           align: 'center'
         },
         {
           title: '分类',
           key: 'category_id',
           align: 'center',
-          editable: true
+          render: (h, params) => {
+            let category = params.row.category
+            return h('span', category.name)
+          }
         },
         {
           title: '观看量',
-          key: 'type',
+          key: 'view_num',
           align: 'center'
         },
         {
@@ -256,9 +101,9 @@ export default {
           align: 'center',
           render: (h, params) => {
             if (params.row.is_show == '1') {
-              return h('span', '上架')
+              return h('span', '显示')
             } else {
-              return h('span', '下架')
+              return h('span', '隐藏')
             }
           }
         },
@@ -270,7 +115,7 @@ export default {
         {
           title: '操作',
           key: 'id',
-          width: 200,
+          width: 140,
           align: 'center',
           render: (h, params) => {
             return h('div', [
@@ -282,46 +127,12 @@ export default {
                 on: {
                   click: () => {
                     this.$router.push({
-                      name: 'courseDetailNetwork',
+                      name: 'editCourseDetailNetwork',
                       query: { id: params.row.id }
                     })
                   }
                 }
-              }, '查看'),
-              h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'editCourseDetailNetwork',
-                      query: { id: 12 }
-                    })
-                  }
-                }
-              }, '编辑'),
-              h('span', {
-                style: {
-                  color: '#ed4014',
-                  marginRight: '18px'
-                },
-                on: {
-                  click: () => {
-                    this.$Modal.confirm({
-                      title: '温馨提示',
-                      content: `<p>你确定该订单已付款吗？</p>`,
-                      onOk: () => {
-                        this.$Message.info('点击了确认')
-                      },
-                      onCancel: () => {
-                        console.log('点击了取消')
-                      }
-                    })
-                  }
-                }
-              }, '下架')
+              }, '查看详情')
             ])
           }
         }

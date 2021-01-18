@@ -6,28 +6,15 @@
         <Card style="margin-bottom: 32px">
           <Row :gutter="20">
             <Col span="20">
-              <span>启用状态：</span>
-              <Select v-model="SelectValue" style="width:200px;margin-right: 20px;">
-                <Option value="" label="全部"></Option>
-                <Option value="1" label="启用"></Option>
-                <Option value="0" label="禁用"></Option>
-              </Select>
               <span>搜索关键词：</span>
               <Input
                 v-model="searchKeyword"
                 @on-enter="handleSearch"
-                placeholder="搜索用户..."
+                placeholder="搜索分类..."
                 style="width: 200px;"/>
-            </Col>
-            <Col span="20" style="margin-top: 32px">
-              <span>更新时间：</span>
-              <DatePicker type="datetimerange" placeholder="选择查询日期" v-model="beginDate"style="width:200px;margin-right: 20px;"></DatePicker>
+              <Button type="warning" icon="ios-search" style="margin-left: 12px;" @click="handleSearch">搜索</Button>
             </Col>
           </Row>
-          <div style="margin-top: 22px;">
-            <Button type="warning" icon="ios-search" style="margin-left: 12px;" @click="handleSearch">搜索</Button>
-            <Button type="primary" style="margin-left: 12px; " @click="reset('addAuthorizationUser')">重置</Button>
-          </div>
         </Card>
         <Button type="primary" style="margin-left: 12px;margin-bottom: 22px; " @click="addClass('-1')">
           新增分类
@@ -225,7 +212,15 @@ export default {
         name: this.ClassData.name,
         is_show: this.ClassData.value == '启用' ? '1' : '0'
       }
+      let vm = this
+      console.log(vm.ClassData)
+      for (let item in data) {
+        if (!data[item]) {
+          return this.$Message.error('你有信息项未填写，请先填写!')
+        }
+      }
       console.log(data)
+      // return
       if (this.ClassId) {
         uAxios.put(`courses/categories/${this.ClassId}`, data)
           .then(res => {
@@ -236,7 +231,7 @@ export default {
             }
           })
       } else {
-        uAxios.post(`courses/categories`)
+        uAxios.post(`courses/categories`, data)
           .then(res => {
             let result = res.data
             if (result.code == 0) {

@@ -4,7 +4,7 @@
       <TabPane :label="title" name="adminList">
         <Form :model="formItem" :label-width="100">
           <Row :gutter="22">
-            <Col span="18">
+            <Col span="20">
               <Card title="基础信息">
                 <FormItem label="门店名称：" prop="account">
                   <Input v-model="formItem.name" placeholder="请输入..." style="max-width:220px;"></Input>
@@ -50,6 +50,8 @@
               <Card title="门店课程" style="margin-top: 22px;">
                 <Button type="primary" style="margin-bottom: 22px; " @click="addCourseFn()">新建课程</Button>
                 <Table border :columns="courseList" :data="courseData"></Table>
+                <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
+                      style="margin-top:30px;margin-bottom:30px;"  show-elevator></Page>
               </Card>
               <Card title="预约券列表" style="margin-top: 22px;">
                 <Button type="primary" style="margin-bottom: 22px; " @click="showTicketFn()">新增预约券</Button>
@@ -81,7 +83,7 @@
         </FormItem>
       </Form>
     </Modal>
-    <Modal v-model="showTicket" width="460" :title="coacheTitle" @on-ok="addTitleFn" >
+    <Modal v-model="showTicket" width="460" title="预约券详情" @on-ok="addTitleFn" >
       <Form :label-width="100" >
         <FormItem label="卡券名称：">
           <Input v-model="TicketData.name" placeholder="请输入卡券名称" style="max-width:220px;"></Input>
@@ -146,6 +148,7 @@ export default {
       shopDetail: {},
       setLocation: [],
       push_money: [],
+      orgTotal: 0, // 分页
       coaches: [],
       title: '新增门店详情',
       coacheTitle: '新增门店教练',
@@ -157,24 +160,59 @@ export default {
       courseData: [],
       courseList: [
         {
-          title: '名称',
+          title: '课程ID',
+          key: 'id',
+          align: 'center'
+        },
+        {
+          title: '课程名称',
           key: 'name',
           align: 'center'
         },
         {
-          title: '总次数',
-          key: 'total_num',
+          title: '头像',
+          key: 'photo',
+          render: (h, params) => {
+            return h('img', {
+              attrs: {
+                src: params.row.pic
+              },
+              style: {
+                width: '48px',
+                height: '48px',
+                marginTop: '6px',
+                border: '4px solid #f4f4f4'
+              },
+              on: {
+                click: () => {
+                }
+              }
+            })
+          },
+          width: 80,
           align: 'center'
         },
+        // {
+        //   title: '总次数',
+        //   key: 'total_num',
+        //   align: 'center'
+        // },
+        // {
+        //   title: '已预约',
+        //   key: 'valid_days',
+        //   align: 'center'
+        // },
         {
-          title: '有效天数',
-          key: 'valid_days',
-          align: 'center'
-        },
-        {
-          title: '价格',
-          key: 'price',
-          align: 'center'
+          title: '状态',
+          key: 'name',
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.is_show == '1') {
+              return h('span', '启用')
+            } else {
+              return h('span', '禁用')
+            }
+          }
         },
         {
           title: '创建时间',
@@ -196,12 +234,10 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.TicketData.name = params.row.name
-                    this.TicketData.total_num = params.row.total_num
-                    this.TicketData.valid_days = params.row.valid_days
-                    this.TicketData.price = params.row.price
-                    this.ticketId = params.row.id
-                    this.showTicket = !this.showTicket
+                    this.$router.push({
+                      name: 'editCourseDetailTeam',
+                      query: { id: this.id, courseId: params.row.id }
+                    })
                     console.log(this.coachId)
                   }
                 }
@@ -216,7 +252,7 @@ export default {
                       title: '温馨提示',
                       content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除?</p>`,
                       onOk: () => {
-                        this.removeTicket(params.row.id, params.index)
+                        this.removeCourse(params.row.id, params.index)
                       },
                       onCancel: () => {
                         console.log('点击了取消')
@@ -307,17 +343,6 @@ export default {
       id: '',
       modal: false,
       modal1: false,
-      formItem1: {
-        name: '',
-        price: '',
-        num: ''
-      },
-      formItem2: {
-        name: '',
-        day: '',
-        time: '',
-        num: ''
-      },
       coachList: [],
       coachColumns: [
         {
@@ -500,6 +525,16 @@ export default {
           }
         })
     },
+    removeCourse (id) { // 删除删除课程
+      let vm = this
+      uAxios.delete(`courses/${id}`)
+        .then(res => {
+          if (res.data.code == 0) {
+            vm.$Message.success('删除成功!')
+            vm.getCourseData(1)
+          }
+        })
+    },
     hideModal (val) {
       this.showMapModel = val
     },
@@ -569,6 +604,8 @@ export default {
         store_id: this.id,
         is_show: 1
       }
+      console.log(data)
+      // return
       if (this.ticketId) {
         uAxios.put(`course/tickets`, data)
           .then(res => {
@@ -678,7 +715,7 @@ export default {
       this.$Message.info('This is a test')
     },
     handlePage (num) { // 分页
-      this.getlist(num)
+      this.getCourseData(num)
     },
     getlist (page) {
       let self = this
@@ -697,11 +734,12 @@ export default {
     getCourseData (page) {
       let self = this
       self.loading = true
-      uAxios.get(`courses?store_id=${this.id}&nopage=1`)
+      uAxios.get(`courses?store_id=${this.id}&nopage=1&type=league`)
         .then(res => {
           let result = res.data.data
-          self.courseData = result
-          console.log(self.tickets)
+          self.courseData = result.data
+          self.orgTotal = result.total
+          console.log(self.courseData, 'tickets')
         })
     },
     getTickets (page) {
