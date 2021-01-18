@@ -13,7 +13,7 @@
                   <Input v-model="formData.store_name" placeholder="店长" disabled style="max-width:220px;margin-right: 22px;"></Input>
                 </FormItem>
                 <FormItem label="所属店长：" prop="account">
-                  <Input v-model="formData.manager_name" placeholder="店长" disabled style="max-width:220px;margin-right: 22px;"></Input>
+                  <Input v-model="manager_name" placeholder="店长" disabled style="max-width:220px;margin-right: 22px;"></Input>
                 </FormItem>
                 <FormItem label="课程图片：" prop="account">
                   <uploadImage v-on:uploadPictures="uploadPicture" :pic="formData.pic"></uploadImage>
@@ -55,11 +55,11 @@
           <Input v-model="formItem2.name" placeholder="请输入..." style="width:200px;"></Input>
         </FormItem>
         <FormItem label="时间：">
-          <DatePicker type="datetimerange" v-model="formItem2.day" placeholder="选择查询日期" style="width:200px;"></DatePicker>
+          <DatePicker type="datetimerange" v-model="day" placeholder="选择查询日期" style="width:200px;"></DatePicker>
         </FormItem>
-        <FormItem label="有效天数">
-          <Input v-model="formItem2.valid_day"  placeholder="请输入..." style="width:200px;"></Input>
-        </FormItem>
+<!--        <FormItem label="有效天数">-->
+<!--          <Input v-model="formItem2.valid_day"  placeholder="请输入..." style="width:200px;"></Input>-->
+<!--        </FormItem>-->
         <FormItem label="上课人数：">
           <Input v-model="formItem2.num" placeholder="请输入..." style="width:200px;"></Input>
         </FormItem>
@@ -86,15 +86,19 @@ export default {
       modal: false,
       modal1: false,
       courseId: '',
+      day: '',
       formItem2: {
         name: '',
-        day: '',
         start_time: '',
         end_time: '',
-        valid_day: '',
         num: ''
       },
       columns: [
+        {
+          title: '课时ID',
+          key: 'id',
+          align: 'center'
+        },
         {
           title: '课时',
           key: 'name',
@@ -102,17 +106,12 @@ export default {
         },
         {
           title: '开始时间',
-          key: 'time',
+          key: 'start_time',
           align: 'center'
         },
         {
           title: '结束时间',
-          key: 'time',
-          align: 'center'
-        },
-        {
-          title: '有效天数',
-          key: 'num',
+          key: 'end_time',
           align: 'center'
         },
         {
@@ -122,7 +121,7 @@ export default {
         },
         {
           title: '已经预约',
-          key: 'num',
+          key: 'valid_bookings_count',
           align: 'center'
         },
         {
@@ -154,26 +153,14 @@ export default {
           }
         }
       ],
-      data: [
-        {
-          name: '第一课时',
-          num: 18,
-          day: '12',
-          time: '2020-10-12 8:00'
-        },
-        {
-          name: '第二课时',
-          num: 12,
-          day: '12',
-          time: '2020-10-12 8:00 ~ 2020-10-15 12:00'
-        }
-      ],
+      data: [],
+      manager_name: '',
       stores: {},
       formData: {
         type: 'league',
         name: '',
         pic: '',
-        manager_name: '', // 门店店长
+        // manager_name: '', // 门店店长
         store_name: '', // 门店名称
         store_id: '', // 门店ID
         is_show: '1', // 是否展示，0：否，1：是
@@ -226,21 +213,21 @@ export default {
     ok () {
       let self = this
       self.loading = true
-      // console.log(this.dateFormat(this.formItem2.day[0]))
-      if (this.formItem2.day[0] && this.formItem2.day[1]) {
-        this.formItem2.start_time = this.format(this.formItem2.day[0], 'yyyy-MM-dd HH:ss')
-        this.formItem2.end_time = this.format(this.formItem2.day[1], 'yyyy-MM-dd HH:ss')
+      if (this.day[0] && this.day[1]) {
+        this.formItem2.start_time = this.format(this.day[0], 'yyyy-MM-dd HH:ss')
+        this.formItem2.end_time = this.format(this.day[1], 'yyyy-MM-dd HH:ss')
       }
       for (let item in self.formItem2) {
         if (!self.formItem2[item]) {
           return this.$Message.error('你有信息项未填写，请先填写!')
         }
       }
-      // console.log(this.formItem2)
+      console.log(this.formItem2)
       uAxios.post(`courses/${self.courseId}/schedules`, this.formItem2)
         .then(res => {
           let result = res.data.data
           console.log(result)
+          this.getlist(1)
           this.$Message.success('新增成功!')
         })
     },
@@ -267,13 +254,13 @@ export default {
         .then(res => {
           let result = res.data.data
           console.log(result)
+          self.data = result.schedules
+          self.manager_name = result.store.manager_name
           self.formData = {
             type: 'league',
             name: result.name,
             pic: result.pic,
-            manager_name: result.store.manager_name, // 门店店长
             store_name: result.store.name, // 门店名称
-            // manager_name: result.manager_name
             store_id: result.store_id, // 门店ID
             is_show: result.is_show, // 是否展示，0：否，1：是
             detail: result.detail
@@ -289,7 +276,7 @@ export default {
       uAxios.get(`stores/${this.id}?nopage=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
-          this.formData.manager_name = result.manager_name
+          this.manager_name = result.manager_name
           this.formData.store_name = result.name
           this.formData.store_id = result.id
           console.log(this.formData, 'dasdasd')
@@ -306,16 +293,29 @@ export default {
           return this.$Message.error('你有信息项未填写，请先填写!')
         }
       }
-      uAxios.post(`courses`, vm.formData)
-        .then(res => {
-          if (res.data.code == 0) {
-            this.courseId = res.data.data.id
-            this.$Message.success('修改成功!')
-            // setTimeout(() => {
-            //   this.$router.go(-1) // 返回上一层
-            // }, 800)
-          }
-        })
+      if (vm.courseId) {
+        uAxios.put(`courses/${vm.courseId}`, vm.formData)
+          .then(res => {
+            if (res.data.code == 0) {
+              // this.courseId = res.data.data.id
+              this.$Message.success('修改成功!')
+              // setTimeout(() => {
+              //   this.$router.go(-1) // 返回上一层
+              // }, 800)
+            }
+          })
+      } else {
+        uAxios.post(`courses`, vm.formData)
+          .then(res => {
+            if (res.data.code == 0) {
+              // this.courseId = res.data.data.id
+              this.$Message.success('新增成功!')
+              // setTimeout(() => {
+              //   this.$router.go(-1) // 返回上一层
+              // }, 800)
+            }
+          })
+      }
     }
   },
   mounted () {

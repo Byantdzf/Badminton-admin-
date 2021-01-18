@@ -10,17 +10,17 @@
                   <img :src="userInfo.photo || image"
                        alt="" width="80rpx" style="margin: 12px 22px 0 -6px;border: 2px solid #f3f3f3;">
                 </FormItem>
-                <FormItem label="用户ID" prop="account">
+                <FormItem label="用户ID：" prop="account">
                   <span>{{userInfo.id}}</span>
                 </FormItem>
-                <FormItem label="昵称" prop="account">
+                <FormItem label="昵称：" prop="account">
                   <span>{{userInfo.name}}</span>
                 </FormItem>
-                <FormItem label="手机号" prop="account">
+                <FormItem label="手机号：" prop="account">
                   <span>{{userInfo.mobile}}</span>
                 </FormItem>
-                <FormItem label="所属门店" prop="account">
-                  <span>李宁店铺</span>
+                <FormItem label="所属门店：" prop="account">
+                  <span>{{ userInfo.store_id || '未获取' }}</span>
                 </FormItem>
                 <FormItem label="账号状态" prop="account">
                   <span v-if="userInfo.is_show">启用</span>
@@ -37,26 +37,27 @@
             <Col span="6">
               <Card title="个人资料信息">
                 <FormItem label="姓名" prop="account">
-                  <span>小王</span>
+                  <span>{{userInfo.name || '--'}}</span>
                 </FormItem>
                 <FormItem label="性别" prop="account">
-                  <span>男</span>
+                  <span>{{userInfo.profile.sex == '1'?'男':'女'}}</span>
                 </FormItem>
                 <FormItem label="出生年月日" prop="account">
-                  <span>1995-12-9</span>
+                  <span>{{userInfo.profile.birthday || '--'}}</span>
                 </FormItem>
                 <FormItem label="电话" prop="account">
-                  <span>15707534403</span>
+                  <span>{{userInfo.mobile || '--'}}</span>
                 </FormItem>
                 <FormItem label="用户状态" prop="account">
-                  <span>禁用</span>
+                  <span v-if="!userInfo.is_show">隐藏</span>
+                  <span v-else>显示</span>
                 </FormItem>
                 <FormItem label="预期收获" prop="account">
-                  <span>增强抵抗力</span>
+                  <span>{{userInfo.profile.expect || '--'}}</span>
                 </FormItem>
-                <FormItem label="正在培训课程" prop="account">
-                  <span>培训班</span>
-                </FormItem>
+<!--                <FormItem label="正在培训课程" prop="account">-->
+<!--                  <span>培训班</span>-->
+<!--                </FormItem>-->
               </Card>
             </Col>
           </Row>
@@ -104,6 +105,7 @@ export default {
         confirmPassword: '', // 确认密码
         desc: ''
       },
+      id: '',
       image: 'https://images.ufutx.com/202011/16/f3defb534a8d8587179cb32f4d561bca.jpeg',
       indeterminate: true,
       checkAll: false,
@@ -213,46 +215,7 @@ export default {
         }
       ],
       data: [
-        {
-          name: 'John Brown',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jim Green',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Joe Black',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '续费',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jon Snow',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        }
+
       ],
       columns2: [
         {
@@ -342,46 +305,7 @@ export default {
         }
       ],
       data2: [
-        {
-          name: 'John Brown',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jim Green',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Joe Black',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '续费',
-          time: '2020-08-12 12:56'
-        },
-        {
-          name: 'Jon Snow',
-          age: '拉杆教学',
-          specification: '10次卡',
-          num: '9',
-          price: '22.00',
-          pic: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1577133426,2347321117&fm=26&gp=0.jpg',
-          address: '首次购买',
-          time: '2020-08-12 12:56'
-        }
+
       ]
     }
   },
@@ -441,9 +365,9 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`users/1?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`users/${self.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
-          self.userInfo = res.data.data
+          self.userInfo = res.data.data.user
           console.log(self.userInfo)
           let result = res.data.data
           if (result.data) {
@@ -467,8 +391,13 @@ export default {
     }
   },
   mounted () {
-    this.getlist(1)
-    console.log(this.$route.query)
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id
+      this.getlist(1)
+      this.title = '编辑门店详情'
+    }
+    // this.getlist(1)
+    // console.log(this.$route.query)
   }
 }
 </script>

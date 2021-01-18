@@ -160,11 +160,10 @@ export default {
   },
   methods: {
     showCarouselsFn () {
-      // this.coachName = ''
-      // this.coachPic = ''
-      // this.coachIntro = ''
-      // this.coachId = 0
-      // this.coacheTitle = '新增门店教练'
+      this.title = '新增'
+      this.carouselId = ''
+      this.pic = ''
+      this.path = ''
       this.showCarousels = !this.showCarousels
     },
     showTicketFn () {

@@ -208,9 +208,9 @@ export default {
           align: 'center',
           render: (h, params) => {
             if (params.row.is_show == '1') {
-              return h('span', '启用')
+              return h('span', '显示')
             } else {
-              return h('span', '禁用')
+              return h('span', '隐藏')
             }
           }
         },
@@ -479,6 +479,11 @@ export default {
       this.addCoach = !this.addCoach
     },
     showTicketFn () {
+      this.TicketData.name = ''
+      this.TicketData.total_num = ''
+      this.TicketData.valid_days = ''
+      this.TicketData.price = ''
+      this.ticketId = ''
       this.showTicket = !this.showTicket
     },
     addCourseFn () {
@@ -517,7 +522,7 @@ export default {
     },
     removeTicket (id) { // 删除预约券
       let vm = this
-      uAxios.delete(`course/tickets?store_id=${id}`)
+      uAxios.delete(`course/tickets/${id}`)
         .then(res => {
           if (res.data.code == 0) {
             vm.$Message.success('删除成功!')
@@ -607,7 +612,7 @@ export default {
       console.log(data)
       // return
       if (this.ticketId) {
-        uAxios.put(`course/tickets`, data)
+        uAxios.put(`course/tickets/${this.id}`, data)
           .then(res => {
             let result = res.data.data
             console.log(result)
