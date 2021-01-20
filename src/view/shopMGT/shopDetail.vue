@@ -24,9 +24,13 @@
                     <Select v-model="formItem.user_id" style="width: 220px;margin-right: 22px;" filterable @on-query-change="getGropData" >
                       <Option v-for="item in userList" :value="item.id" :key="item.id" >{{ item.name }}</Option>
                     </Select>
-                    <Button type="" @click="showEdit = true">取消</Button>
+                    <Button type="" @click="showEdit = !showEdit">取消</Button>
                   </span>
-
+                </FormItem>
+                <FormItem label="店长登录密码：" prop="account" v-if="!showEdit">
+                  <span v-if="!showEdit">
+                    <Input v-model="formItem.password" placeholder="登录店长端密码" style="max-width:220px;margin-right: 22px;"></Input>
+                  </span>
                 </FormItem>
                 <FormItem label="门店图片：" prop="account">
                   <Card style="max-width: 420px;">
@@ -127,6 +131,7 @@ export default {
     return {
       addCoach: false,
       showTicket: false,
+      password: '',
       TicketData: {
         name: '',
         total_num: '',
@@ -461,6 +466,7 @@ export default {
         dist: '',
         address: '',
         pic: '',
+        password: '',
         business_license: '',
         detail: '',
         longitude: '',

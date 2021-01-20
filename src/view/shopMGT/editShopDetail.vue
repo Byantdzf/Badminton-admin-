@@ -20,6 +20,9 @@
                     <Option v-for="item in userList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                   </Select>
                 </FormItem>
+                <FormItem label="店长登录密码：" prop="account" v-if="formItem.user_id">
+                    <Input v-model="formItem.password" placeholder="登录店长端密码" style="max-width:220px;margin-right: 22px;"></Input>
+                </FormItem>
                 <FormItem label="门店图片：" prop="account">
                   <Card style="max-width: 420px;">
                     <uploadImage v-on:uploadPictures="uploadPicture" :pic="formItem.pic"></uploadImage>
@@ -206,6 +209,7 @@ export default {
         dist: '',
         address: '',
         pic: '',
+        password: '',
         business_license: '',
         detail: '',
         longitude: '',
