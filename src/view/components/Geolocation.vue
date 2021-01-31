@@ -15,66 +15,184 @@
 </template>
 
 <script>
-  export default {
-    props: ['setLocation'],
-    data () {
-      return {
-        keyword: '',
-        showCode: false,
-        address: {},
-        getLng: '', // 点击的纬度
-        getLat: '', // 点击的经度
-        lnglat: []
-      }
+export default {
+  props: ['setLocation'],
+  data () {
+    return {
+      keyword: '',
+      showCode: false,
+      address: {},
+      getLng: '', // 点击的纬度
+      getLat: '', // 点击的经度
+      lnglat: []
+    }
+  },
+  watch: {
+    keyword () {
+      this.address.address = this.keyword
+      this.$emit('getLocation', this.address, this.lnglat)
+    }
+  },
+  methods: {
+    showCodeFn () {
+      this.$Modal.remove()
+      this.$emit('hideModal', false)
+      this.showCode = true
     },
-    watch: {
-      keyword () {
-        this.address.address = this.keyword
-        this.$emit('getLocation', this.address, this.lnglat)
-      }
-    },
-    methods: {
-      showCodeFn () {
-        this.$Modal.remove()
-        this.$emit('hideModal', false)
-        this.showCode = true
-      },
-      init () {
-        let vm = this
-        let marker, map = new AMap.Map('container', { // 初始化地图
-          center: vm.setLocation.length > 0 && vm.setLocation[0] !== null ? vm.setLocation : [114.0595600000, 22.5428600000],
-          resizeEnable: true,
-          zoom: 16,
-          keyboardEnable: false,
-          resizeEnable: true,
-          viewMode: '3D',
-          pinch: 45
-        })
-        map.setFitView()
-        let geocoder
-        let auto = new AMap.Autocomplete({input: 'tipinput'})  // 绑定搜索input
-        let infoWindow = new AMap.InfoWindow({ // 构造标注点的文本参数
-          autoMove: true,
-          offset: new AMap.Pixel(4, -30)
-        })
-        let placeSearch = new AMap.PlaceSearch({ // 构造地点查询类
-          map: map,
-          pageSize: 1, // 单页显示结果条数
-          extensions: 'base' //返回基本地址信息
-        })
+    init () {
+      let vm = this
+      let marker; let map = new AMap.Map('container', { // 初始化地图
+        center: vm.setLocation.length > 0 && vm.setLocation[0] !== null ? vm.setLocation : [114.0595600000, 22.5428600000],
+        resizeEnable: true,
+        zoom: 16,
+        keyboardEnable: false,
+        viewMode: '3D',
+        pinch: 45
+      })
+      map.setFitView()
+      let geocoder
+      let auto = new AMap.Autocomplete({ input: 'tipinput' }) // 绑定搜索input
+      let infoWindow = new AMap.InfoWindow({ // 构造标注点的文本参数
+        autoMove: true,
+        offset: new AMap.Pixel(10, 20)
+      })
+      let placeSearch = new AMap.PlaceSearch({ // 构造地点查询类
+        map: map,
+        pageSize: 1, // 单页显示结果条数
+        extensions: 'base' // 返回基本地址信息
+      })
 
-        function regeoCode (getLng, getLat) {
-          if (!geocoder) {
-            geocoder = new AMap.Geocoder({
-              // city: '010', //城市设为北京，默认：“全国”
-              radius: 1000 //范围，默认：500
+      function regeoCode (getLng, getLat) {
+        if (!geocoder) {
+          geocoder = new AMap.Geocoder({
+            // city: '010', //城市设为北京，默认：“全国”
+            radius: 500 // 范围，默认：500
+          })
+        }
+        vm.lnglat = [getLng, getLat]
+        if (!marker) {
+          marker = new AMap.Marker({
+            icon: 'http:////a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
+            position: [getLng, getLat],
+            offset: new AMap.Pixel(-13, -30),
+            draggable: true,
+            cursor: 'move',
+            raiseOnDrag: true
+          })
+          map.add(marker)
+        }
+        marker.setPosition(vm.lnglat)
+        map.setCenter(marker.getPosition())
+        AMap.event.addListener(marker, 'dragend', function (e) {
+          vm.lnglat = marker.getPosition()
+          geocoder.getAddress(vm.lnglat, function (status, result) {
+            if (status === 'complete' && result.regeocode) {
+              console.log(result.regeocode.addressComponent)
+              let address = result.regeocode.formattedAddress
+              let citycode = result.regeocode.addressComponent.citycode
+              let value = {
+                address: address,
+                province: result.regeocode.addressComponent.province,
+                city: result.regeocode.addressComponent.city,
+                dist: result.regeocode.addressComponent.district
+              }
+              vm.keyword = address
+              vm.address = value
+              infoWindow.setContent(createContent(address, vm.lnglat, citycode))
+              infoWindow.open(map, marker.getPosition())
+              vm.$emit('getLocation', value, vm.lnglat)
+            } else {
+              vm.$Notice.error({
+                title: '温馨提示：',
+                desc: `位置有误！`
+              })
+            }
+          })
+        })
+        geocoder.getAddress(vm.lnglat, function (status, result) {
+          if (status === 'complete' && result.regeocode) {
+            console.log(result.regeocode.addressComponent)
+            let address = result.regeocode.formattedAddress
+            let citycode = result.regeocode.addressComponent.citycode
+            let value = {
+              address: address,
+              province: result.regeocode.addressComponent.province,
+              city: result.regeocode.addressComponent.city,
+              dist: result.regeocode.addressComponent.district
+            }
+            vm.keyword = address
+            vm.address = value
+            infoWindow.setContent(createContent(address, vm.lnglat, citycode))
+            infoWindow.open(map, marker.getPosition())
+            vm.$emit('getLocation', value, vm.lnglat)
+          } else {
+            vm.$Notice.error({
+              title: '温馨提示：',
+              desc: `位置有误！`
             })
           }
-          vm.lnglat = [getLng, getLat]
+        })
+      }
+
+      function createContent (address, lnglat, citycode) { // 信息窗体内容
+        let s = []
+        s.push(`<b>经纬度：${lnglat}</b>`)
+        s.push(`地址：${address}`)
+        s.push(`区号：${citycode}`)
+        return s.join('<br>')
+      }
+
+      function select (e) { // 搜索函数
+        placeSearch.setCity(e.poi.adcode)
+        placeSearch.search(e.poi.name, (status, result) => { // 关键字查询查询
+          console.log(status)
+          let { lng, lat } = result.poiList.pois[0].location
+          regeoCode(lng, lat)
+        })
+      }
+      AMap.event.addListener(auto, 'select', select) // 注册监听，当选中某条记录时会触发
+      AMap.event.addListener(placeSearch, 'markerClick', (e) => { // 点击标注
+      })
+      map.on('click', (e) => { // 点击地图添加标注点
+        regeoCode(e.lnglat.getLng(), e.lnglat.getLat())
+      })
+      map.on('dragend', () => { // 移动地图
+        regeoCode(map.getCenter().lng, map.getCenter().lat)
+      })
+      map.on('complete', () => { // 地图加载完成
+        regeoCode(map.getCenter().lng, map.getCenter().lat) // 初始化地图中心点坐标
+      })
+      AMap.plugin([ // 添加 3D 罗盘控制
+        'AMap.ControlBar'
+      ], () => {
+        map.addControl(new AMap.ControlBar())
+      })
+    },
+    geoCode () {
+      let vm = this
+      let map = new AMap.Map('container', {
+        resizeEnable: true,
+        zoom: 16,
+        keyboardEnable: false,
+        viewMode: '3D',
+        pinch: 45
+      })
+      let geocoder, marker
+
+      if (!geocoder) {
+        geocoder = new AMap.Geocoder({
+          // city: '010', //城市设为北京，默认：“全国”
+          radius: 500 // 范围，默认：500
+        })
+      }
+      geocoder.getLocation(vm.keyword, function (status, result) {
+        if (status === 'complete' && result.geocodes) {
+          console.log(result.geocodes[0])
+          vm.lnglat = [result.geocodes[0].location.lng, result.geocodes[0].location.lat]
           if (!marker) {
             marker = new AMap.Marker({
               icon: 'http:////a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
-              position: [getLng, getLat],
+              position: vm.lnglat,
               offset: new AMap.Pixel(-13, -30),
               draggable: true,
               cursor: 'move',
@@ -89,14 +207,14 @@
             geocoder.getAddress(vm.lnglat, function (status, result) {
               if (status === 'complete' && result.regeocode) {
                 console.log(result.regeocode.addressComponent)
-                let address = result.regeocode.formattedAddress,
-                  citycode = result.regeocode.addressComponent.citycode,
-                  value = {
-                    address: address,
-                    province: result.regeocode.addressComponent.province,
-                    city: result.regeocode.addressComponent.city,
-                    dist: result.regeocode.addressComponent.district
-                  }
+                let address = result.regeocode.formattedAddress
+                let citycode = result.regeocode.addressComponent.citycode
+                let value = {
+                  address: address,
+                  province: result.regeocode.addressComponent.province,
+                  city: result.regeocode.addressComponent.city,
+                  dist: result.regeocode.addressComponent.district
+                }
                 vm.keyword = address
                 vm.address = value
                 infoWindow.setContent(createContent(address, vm.lnglat, citycode))
@@ -110,134 +228,74 @@
               }
             })
           })
-          geocoder.getAddress(vm.lnglat, function (status, result) {
-            if (status === 'complete' && result.regeocode) {
-              console.log(result.regeocode.addressComponent)
-              let address = result.regeocode.formattedAddress,
-                citycode = result.regeocode.addressComponent.citycode,
-                value = {
-                  address: address,
-                  province: result.regeocode.addressComponent.province,
-                  city: result.regeocode.addressComponent.city,
-                  dist: result.regeocode.addressComponent.district
-                }
-              vm.keyword = address
-              vm.address = value
-              infoWindow.setContent(createContent(address, vm.lnglat, citycode))
-              infoWindow.open(map, marker.getPosition())
-              vm.$emit('getLocation', value, vm.lnglat)
-            } else {
-              vm.$Notice.error({
-                title: '温馨提示：',
-                desc: `位置有误！`
-              })
-            }
+          let address = result.geocodes[0].formattedAddress
+          let citycode = result.geocodes[0].addressComponent.citycode
+          let value = {
+            address: address,
+            province: result.geocodes[0].addressComponent.province,
+            city: result.geocodes[0].addressComponent.city,
+            dist: result.geocodes[0].addressComponent.district
+          }
+          vm.keyword = address
+          vm.address = value
+          infoWindow.setContent(createContent(address, vm.lnglat, citycode))
+          infoWindow.open(map, marker.getPosition())
+          vm.$emit('getLocation', value, vm.lnglat)
+        } else {
+          vm.$Notice.error({
+            title: '温馨提示：',
+            desc: `位置有误！`
           })
         }
+      })
+      let auto = new AMap.Autocomplete({ input: 'tipinput' }) // 绑定搜索input
+      let infoWindow = new AMap.InfoWindow({ // 构造标注点的文本参数
+        autoMove: true,
+        offset: new AMap.Pixel(10, 20)
+      })
+      let placeSearch = new AMap.PlaceSearch({ // 构造地点查询类
+        map: map,
+        pageSize: 1, // 单页显示结果条数
+        extensions: 'base' // 返回基本地址信息
+      })
 
-        function createContent (address, lnglat, citycode) {  //信息窗体内容
-          let s = []
-          s.push(`<b>经纬度：${lnglat}</b>`)
-          s.push(`地址：${address}`)
-          s.push(`区号：${citycode}`)
-          return s.join('<br>')
-        }
-
-        function select (e) {  // 搜索函数
-          placeSearch.setCity(e.poi.adcode)
-          placeSearch.search(e.poi.name, (status, result) => {  // 关键字查询查询
-            console.log(status)
-            let {lng, lat} = result.poiList.pois[0].location
-            regeoCode(lng, lat)
-          })
-        }
-        AMap.event.addListener(auto, 'select', select) // 注册监听，当选中某条记录时会触发
-        AMap.event.addListener(placeSearch, 'markerClick', (e) => { // 点击标注
-        })
-        map.on('click', (e) => { // 点击地图添加标注点
-          regeoCode(e.lnglat.getLng(), e.lnglat.getLat())
-        })
-        map.on('dragend', () => { // 移动地图
-          regeoCode(map.getCenter().lng, map.getCenter().lat)
-        })
-        map.on('complete', () => {  // 地图加载完成
-          regeoCode(map.getCenter().lng, map.getCenter().lat)  // 初始化地图中心点坐标
-        })
-        AMap.plugin([ // 添加 3D 罗盘控制
-          'AMap.ControlBar',
-        ], () => {
-          map.addControl(new AMap.ControlBar())
-        })
-      },
-      geoCode () {
-        let vm = this
-        let map = new AMap.Map('container', {
-          resizeEnable: true,
-          zoom: 16,
-          keyboardEnable: false,
-          resizeEnable: true,
-          viewMode: '3D',
-          pinch: 45
-        })
-        let geocoder, marker
-
+      function regeoCode (getLng, getLat) {
         if (!geocoder) {
           geocoder = new AMap.Geocoder({
             // city: '010', //城市设为北京，默认：“全国”
-            radius: 500 //范围，默认：500
+            radius: 1000 // 范围，默认：500
           })
         }
-        geocoder.getLocation(vm.keyword, function (status, result) {
-          if (status === 'complete' && result.geocodes) {
-            console.log(result.geocodes[0])
-            vm.lnglat = [result.geocodes[0].location.lng, result.geocodes[0].location.lat]
-            if (!marker) {
-              marker = new AMap.Marker({
-                icon: 'http:////a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
-                position: vm.lnglat,
-                offset: new AMap.Pixel(-13, -30),
-                draggable: true,
-                cursor: 'move',
-                raiseOnDrag: true
-              })
-              map.add(marker)
+        vm.lnglat = [getLng, getLat]
+        if (!marker) {
+          marker = new AMap.Marker({
+            icon: 'http:////a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
+            position: [getLng, getLat],
+            offset: new AMap.Pixel(10, 20),
+            // draggable: true,
+            cursor: 'move',
+            raiseOnDrag: true
+          })
+          map.add(marker)
+        }
+        marker.setPosition(vm.lnglat)
+        map.setCenter(marker.getPosition())
+        // marker.on('dragging', (e) => {
+        //   console.log(e)
+        //   let {lng, lat} = e.lnglat
+        //   regeoCode(lng, lat)
+        // });
+        geocoder.getAddress(vm.lnglat, function (status, result) {
+          if (status === 'complete' && result.regeocode) {
+            console.log(result.regeocode.addressComponent)
+            let address = result.regeocode.formattedAddress
+            let citycode = result.regeocode.addressComponent.citycode
+            let value = {
+              address: address,
+              province: result.regeocode.addressComponent.province,
+              city: result.regeocode.addressComponent.city,
+              dist: result.regeocode.addressComponent.district
             }
-            marker.setPosition(vm.lnglat)
-            map.setCenter(marker.getPosition())
-            AMap.event.addListener(marker, 'dragend', function (e) {
-              vm.lnglat = marker.getPosition()
-              geocoder.getAddress(vm.lnglat, function (status, result) {
-                if (status === 'complete' && result.regeocode) {
-                  console.log(result.regeocode.addressComponent)
-                  let address = result.regeocode.formattedAddress,
-                    citycode = result.regeocode.addressComponent.citycode,
-                    value = {
-                      address: address,
-                      province: result.regeocode.addressComponent.province,
-                      city: result.regeocode.addressComponent.city,
-                      dist: result.regeocode.addressComponent.district
-                    }
-                  vm.keyword = address
-                  vm.address = value
-                  infoWindow.setContent(createContent(address, vm.lnglat, citycode))
-                  infoWindow.open(map, marker.getPosition())
-                  vm.$emit('getLocation', value, vm.lnglat)
-                } else {
-                  vm.$Notice.error({
-                    title: '温馨提示：',
-                    desc: `位置有误！`
-                  })
-                }
-              })
-            })
-            let address = result.geocodes[0].formattedAddress,
-              citycode = result.geocodes[0].addressComponent.citycode,
-              value = {
-                address: address,
-                province: result.geocodes[0].addressComponent.province,
-                city: result.geocodes[0].addressComponent.city,
-                dist: result.geocodes[0].addressComponent.district
-              }
             vm.keyword = address
             vm.address = value
             infoWindow.setContent(createContent(address, vm.lnglat, citycode))
@@ -250,110 +308,50 @@
             })
           }
         })
-        let auto = new AMap.Autocomplete({input: 'tipinput'})  // 绑定搜索input
-        let infoWindow = new AMap.InfoWindow({ // 构造标注点的文本参数
-          autoMove: true,
-          offset: new AMap.Pixel(4, -30)
-        })
-        let placeSearch = new AMap.PlaceSearch({ // 构造地点查询类
-          map: map,
-          pageSize: 1, // 单页显示结果条数
-          extensions: 'base' //返回基本地址信息
-        })
+      }
 
-        function regeoCode (getLng, getLat) {
-          if (!geocoder) {
-            geocoder = new AMap.Geocoder({
-              // city: '010', //城市设为北京，默认：“全国”
-              radius: 1000 //范围，默认：500
-            })
-          }
-          vm.lnglat = [getLng, getLat]
-          if (!marker) {
-            marker = new AMap.Marker({
-              icon: 'http:////a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
-              position: [getLng, getLat],
-              offset: new AMap.Pixel(-13, -30),
-              // draggable: true,
-              cursor: 'move',
-              raiseOnDrag: true
-            })
-            map.add(marker)
-          }
-          marker.setPosition(vm.lnglat)
-          map.setCenter(marker.getPosition())
-          // marker.on('dragging', (e) => {
-          //   console.log(e)
-          //   let {lng, lat} = e.lnglat
-          //   regeoCode(lng, lat)
-          // });
-          geocoder.getAddress(vm.lnglat, function (status, result) {
-            if (status === 'complete' && result.regeocode) {
-              console.log(result.regeocode.addressComponent)
-              let address = result.regeocode.formattedAddress,
-                citycode = result.regeocode.addressComponent.citycode,
-                value = {
-                  address: address,
-                  province: result.regeocode.addressComponent.province,
-                  city: result.regeocode.addressComponent.city,
-                  dist: result.regeocode.addressComponent.district
-                }
-              vm.keyword = address
-              vm.address = value
-              infoWindow.setContent(createContent(address, vm.lnglat, citycode))
-              infoWindow.open(map, marker.getPosition())
-              vm.$emit('getLocation', value, vm.lnglat)
-            } else {
-              vm.$Notice.error({
-                title: '温馨提示：',
-                desc: `位置有误！`
-              })
-            }
-          })
-        }
+      function createContent (address, lnglat, citycode) { // 信息窗体内容
+        let s = []
+        s.push(`<b>经纬度：${lnglat}</b>`)
+        s.push(`地址：${address}`)
+        s.push(`区号：${citycode}`)
+        return s.join('<br>')
+      }
 
-        function createContent (address, lnglat, citycode) {  //信息窗体内容
-          let s = []
-          s.push(`<b>经纬度：${lnglat}</b>`)
-          s.push(`地址：${address}`)
-          s.push(`区号：${citycode}`)
-          return s.join('<br>')
-        }
-
-        function select (e) {  // 搜索函数
-          placeSearch.setCity(e.poi.adcode)
-          placeSearch.search(e.poi.name, (status, result) => {  // 关键字查询查询
-            console.log(status)
-            let {lng, lat} = result.poiList.pois[0].location
-            regeoCode(lng, lat)
-          })
-        }
-
-        AMap.event.addListener(auto, 'select', select) // 注册监听，当选中某条记录时会触发
-        AMap.event.addListener(placeSearch, 'markerClick', (e) => { // 点击标注
-        })
-        map.on('click', (e) => { // 点击地图添加标注点
-          regeoCode(e.lnglat.getLng(), e.lnglat.getLat())
-        })
-        map.on('dragend', () => { // 移动地图
-          regeoCode(map.getCenter().lng, map.getCenter().lat)
-        })
-        // map.on('complete', () => {  // 地图加载完成
-        //   regeoCode(map.getCenter().lng, map.getCenter().lat)  // 初始化地图中心点坐标
-        // })
-        AMap.plugin([ // 添加 3D 罗盘控制
-          'AMap.ControlBar',
-        ], () => {
-          map.addControl(new AMap.ControlBar())
+      function select (e) { // 搜索函数
+        placeSearch.setCity(e.poi.adcode)
+        placeSearch.search(e.poi.name, (status, result) => { // 关键字查询查询
+          console.log(status)
+          let { lng, lat } = result.poiList.pois[0].location
+          regeoCode(lng, lat)
         })
       }
-    },
-    mounted () {
-      setTimeout(() => {
-        this.init()
-      }, 1200)
+
+      AMap.event.addListener(auto, 'select', select) // 注册监听，当选中某条记录时会触发
+      AMap.event.addListener(placeSearch, 'markerClick', (e) => { // 点击标注
+      })
+      map.on('click', (e) => { // 点击地图添加标注点
+        regeoCode(e.lnglat.getLng(), e.lnglat.getLat())
+      })
+      map.on('dragend', () => { // 移动地图
+        regeoCode(map.getCenter().lng, map.getCenter().lat)
+      })
+      // map.on('complete', () => {  // 地图加载完成
+      //   regeoCode(map.getCenter().lng, map.getCenter().lat)  // 初始化地图中心点坐标
+      // })
+      AMap.plugin([ // 添加 3D 罗盘控制
+        'AMap.ControlBar'
+      ], () => {
+        map.addControl(new AMap.ControlBar())
+      })
     }
+  },
+  mounted () {
+    // setTimeout(() => {
+    //   this.init()
+    // }, 1200)
   }
+}
 </script>
 
 <style>

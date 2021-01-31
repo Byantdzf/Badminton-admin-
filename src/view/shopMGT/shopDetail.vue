@@ -554,9 +554,10 @@ export default {
       if (address) {
         console.log(address.split(dist))
       }
+      this.address = ''
       this.address = `${childValue.address}`
       this.formItem.province = childValue.province
-      this.formItem.city = childValue.city != '' ? childValue.city : childValue.province
+      this.formItem.city = childValue.city !== '' ? childValue.city : childValue.province
       this.formItem.dist = childValue.dist
       this.formItem.address = address.split(dist)[1]
       this.formItem.longitude = lnglat[0]
