@@ -132,7 +132,26 @@ export default {
                     })
                   }
                 }
-              }, '查看详情')
+              }, '查看详情'),
+              h('span', {
+                style: {
+                  color: '#ed4014'
+                },
+                on: {
+                  click: () => {
+                    this.$Modal.confirm({
+                      title: '温馨提示',
+                      content: `<p>你确定删除该课程吗？</p>`,
+                      onOk: () => {
+                        this.cancelFn(params.index)
+                      },
+                      onCancel: () => {
+                        console.log('点击了取消')
+                      }
+                    })
+                  }
+                }
+              }, '删除课程')
             ])
           }
         }
@@ -272,6 +291,20 @@ export default {
     }
   },
   methods: {
+    cancelFn (index) { // 取消预约
+      let { id } = this.information[index]
+      uAxios.delete(`courses/${id}`)
+        .then(res => {
+          let result = res.data.data
+          this.information.splice(index, 1)
+          console.log(result)
+          // if (result) {
+          //   this.information[index].status = '已取消'
+          //   // this.getlist(1)
+          //   this.$Message.info('已取消')
+          // }
+        })
+    },
     exportFn () { // 导出数据
       let baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.dev : config.baseUrl.pro
       let oa = document.createElement('a')

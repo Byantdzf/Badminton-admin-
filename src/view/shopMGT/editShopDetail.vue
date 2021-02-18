@@ -31,7 +31,7 @@
                 <FormItem label="门店介绍信息：" prop="detail">
                   <tinymce-editor ref="editor"
                                   v-model="formItem.detail"
-                                  style="max-width: 600px;height: 200px;">
+                                  style="width: 400px;height: 200px;">
                   </tinymce-editor>
                 </FormItem>
                 <FormItem label="营业执照：" prop="business_license">
