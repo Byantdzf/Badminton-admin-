@@ -23,30 +23,18 @@
           <Checkbox
             :indeterminate="indeterminate"
             :value="checkAll"
-            @click.prevent.native="handleCheckAll">管理员管理</Checkbox>
+            @click.prevent.native="handleCheckAll">访问页面管理</Checkbox>
         </div>
         <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
-          <Checkbox label="账号列表"></Checkbox>
-          <Checkbox label="角色列表"></Checkbox>
-          <Checkbox label="意见反馈"></Checkbox>
-        </CheckboxGroup>
-      </FormItem>
-      <FormItem>
-        <div style="border-bottom: 1px solid #e9e9e9;padding-bottom:6px;margin-bottom:6px;">
-          <Checkbox
-            :indeterminate="indeterminate"
-            :value="checkAll"
-            @click.prevent.native="handleCheckAll">用户管理</Checkbox>
-        </div>
-        <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
-          <Checkbox label="商品管理"></Checkbox>
-          <Checkbox label="商品分类"></Checkbox>
-        </CheckboxGroup>
-        <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
+          <Checkbox label="系统管理"></Checkbox>
           <Checkbox label="用户管理"></Checkbox>
-          <Checkbox label="评论管理"></Checkbox>
-          <Checkbox label="数据管理"></Checkbox>
-          <Checkbox label="启动页管理"></Checkbox>
+          <Checkbox label="门店管理"></Checkbox>
+          <Checkbox label="预约管理"></Checkbox>
+          <Checkbox label="订单管理"></Checkbox>
+          <Checkbox label="评价管理"></Checkbox>
+          <Checkbox label="财务管理"></Checkbox>
+          <Checkbox label="网课管理"></Checkbox>
+          <Checkbox label="运动轨迹管理"></Checkbox>
         </CheckboxGroup>
       </FormItem>
       <FormItem>

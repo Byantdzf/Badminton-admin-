@@ -37,7 +37,6 @@ export const staticRouters = [
     path: '/',
     name: '系统管理',
     meta: {
-      access: [],
       notCache: true, hideInMenu: false,
       showAlways: true,
       icon: 'logo-windows',
