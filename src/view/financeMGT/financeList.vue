@@ -31,15 +31,18 @@
         </Card>
         <Col span="16" class="height-100">
           <Row type="flex" align="middle" class="height-100 ">
-            <count-up
-              class="infor-card-count user-created-count cardStyle"
-              :id-name="item.name"
-              :end-val="item.endVal"
-              color="#f84646"
-              v-for="item of countList"
-            >
+<!--            <count-up-->
+<!--              class="infor-card-count user-created-count cardStyle"-->
+<!--              :id-name="item.name"-->
+<!--              :end-val="item.endVal"-->
+<!--              color="#f84646"-->
+<!--              v-for="item of countList"-->
+<!--            >-->
+            <div  v-for="item of countList" class="cardStyle" style="text-align: center;">
+              <p  class="infor-card-count user-created-count" style="color: #f84646;font-size: 28px;font-weight: bold; ">{{item.endVal}}</p>
               <p class="infor-intro-text" slot="intro">{{item.text}}</p>
-            </count-up>
+            </div>
+<!--            </count-up>-->
           </Row>
         </Col>
         <Row :gutter="20">
