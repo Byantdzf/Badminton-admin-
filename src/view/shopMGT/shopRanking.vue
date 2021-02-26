@@ -1,6 +1,11 @@
 <template>
 <!--  门店排名-->
   <Card>
+    <p style="margin-top: 22px;">
+      <span>筛选日期：</span>
+      <DatePicker type="datetimerange" placeholder="选择查询日期" v-model="beginDate" style="width: 280px"></DatePicker>
+      <Button type="warning" icon="ios-search" style="margin-left: 12px;" @click="handleSearch">搜索</Button>
+    </p>
     <Tabs style="margin-top: 12px;">
       <TabPane label="门店排名" name="adminList">
         <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border></Table>
@@ -32,7 +37,7 @@ export default {
   },
   data () {
     return {
-      beginDate: '', // 反馈时间
+      beginDate: '', // 时间
       CheckboxValue: false,
       SelectValue: '全部',
       search: '',
@@ -83,6 +88,34 @@ export default {
     }
   },
   methods: {
+    format (time, format) {
+      var t = new Date(time)
+      var tf = function (i) {
+        return (i < 10 ? '0' : '') + i
+      }
+      return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+          case 'yyyy':
+            return tf(t.getFullYear())
+            break
+          case 'MM':
+            return tf(t.getMonth() + 1)
+            break
+          case 'mm':
+            return tf(t.getMinutes())
+            break
+          case 'dd':
+            return tf(t.getDate())
+            break
+          case 'HH':
+            return tf(t.getHours())
+            break
+          case 'ss':
+            return tf(t.getSeconds())
+            break
+        }
+      })
+    },
     reset () {
       this.$Message.info('This is a 重置')
     },
@@ -104,7 +137,12 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`stores/ranking?page=${page}&keyword=${self.searchKeyword}`)
+      if (this.beginDate[0] && this.beginDate[1]) {
+        this.beginDate[0] = this.format(this.beginDate[0], 'yyyy-MM-dd HH:ss')
+        this.beginDate[1] = this.format(this.beginDate[1], 'yyyy-MM-dd HH:ss')
+      }
+      // uAxios.get(`users?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}&is_show=${this.SelectValue}`)
+      uAxios.get(`stores/ranking?page=${page}&keyword=${self.searchKeyword}&start_time=${this.beginDate[0]}&end_time=${this.beginDate[1]}`)
         .then(res => {
           let result = res.data.data
           if (result.data) {
