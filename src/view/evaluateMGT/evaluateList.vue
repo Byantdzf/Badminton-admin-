@@ -6,24 +6,25 @@
         <Card style="margin-bottom: 32px">
           <Row :gutter="20">
             <Col span="20">
-              <span>审核状态：</span>
-              <Select v-model="SelectValue" style="width:200px;margin-right: 20px;">
-                <Option value="" label="全部"></Option>
-                <Option value="1" label="已审核"></Option>
-                <Option value="0" label="审核中"></Option>
-                <Option value="-1" label="已拒绝"></Option>
-              </Select>
+<!--              <span>审核状态：</span>-->
+<!--              <Select v-model="SelectValue" style="width:200px;margin-right: 20px;">-->
+<!--                <Option value="" label="全部"></Option>-->
+<!--                <Option value="1" label="已审核"></Option>-->
+<!--                <Option value="0" label="审核中"></Option>-->
+<!--                <Option value="-1" label="已拒绝"></Option>-->
+<!--              </Select>-->
               <span>搜索关键词：</span>
               <Input
                 v-model="searchKeyword"
                 @on-enter="handleSearch"
                 placeholder="搜索用户..."
                 style="width: 200px;"/>
-            </Col>
-            <Col span="20" style="margin-top: 32px">
               <span>发布时间：</span>
               <DatePicker type="datetimerange" placeholder="选择查询日期" v-model="beginDate"style="width:200px;margin-right: 20px;"></DatePicker>
             </Col>
+<!--            <Col span="20" style="margin-top: 32px">-->
+
+<!--            </Col>-->
           </Row>
           <div style="margin-top: 22px;">
             <Button type="warning" icon="ios-search" style="margin-left: 12px;" @click="handleSearch">搜索</Button>
@@ -99,11 +100,11 @@ export default {
           key: 'created_at',
           align: 'center'
         },
-        {
-          title: '状态',
-          key: 'approved',
-          align: 'center'
-        },
+        // {
+        //   title: '状态',
+        //   key: 'approved',
+        //   align: 'center'
+        // },
         {
           title: '操作',
           key: 'id',

@@ -97,12 +97,12 @@ export default {
           align: 'center',
           editable: true
         },
-        {
-          title: '教练',
-          key: 'coach_name',
-          align: 'center',
-          editable: true
-        },
+        // {
+        //   title: '教练',
+        //   key: 'coach_name',
+        //   align: 'center',
+        //   editable: true
+        // },
         {
           title: '上课状态',
           key: 'status',
