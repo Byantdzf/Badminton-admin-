@@ -87,10 +87,30 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.addRule(params.index)
+                    this.editRule(params.index)
                   }
                 }
-              }, '编辑')
+              }, '编辑'),
+              h('span', {
+                style: {
+                  color: '#f02d44',
+                  marginLeft: '5px'
+                },
+                on: {
+                  click: () => {
+                    this.$Modal.confirm({
+                      title: '温馨提示',
+                      content: `<p>是否将该提成规则删除?</p>`,
+                      onOk: () => {
+                        this.removeAdmin(params.row.id, params.index)
+                      },
+                      onCancel: () => {
+                        console.log('点击了取消')
+                      }
+                    })
+                  }
+                }
+              }, '删除')
             ])
           }
         }
@@ -100,6 +120,9 @@ export default {
   methods: {
     addRule (index) {
       this.modal = true
+    },
+    editRule (index) {
+      this.modal = true
       this.editID = this.information[index].id
       if (this.editID) {
         this.formValidate.value = this.information[index].value
@@ -107,6 +130,15 @@ export default {
       }
       console.log(this.information[index])
       console.log(this.formValidate)
+    },
+    removeAdmin (id, index) {
+      let self = this
+      self.loading = true
+      uAxios.delete(`stores/push/money/logs/${id}`)
+        .then(res => {
+          this.$Message.info('删除成功！')
+          this.getlist(1)
+        })
     },
     ok () {
       let data = {
@@ -125,7 +157,7 @@ export default {
             }
           })
       } else {
-        uAxios.put(`stores/push/money/logs/${this.id}`, data)
+        uAxios.put(`stores/push/money/logs/${this.editID}`, data)
           .then(res => {
             let result = res.data
             if (result.data) {

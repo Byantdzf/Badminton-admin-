@@ -58,6 +58,11 @@
 <!--                <FormItem label="正在培训课程" prop="account">-->
 <!--                  <span>培训班</span>-->
 <!--                </FormItem>-->
+<!--                <Form :label-width="100" >-->
+                  <FormItem label="线下合同：">
+                    <uploadImage v-on:uploadPictures="uploadCoachPic" :pic="pic"></uploadImage>
+                  </FormItem>
+<!--                </Form>-->
               </Card>
             </Col>
           </Row>
@@ -85,15 +90,18 @@ import uAxios from '../../api/index'
 // import config from '../../api/config'
 import dropdown from '../components/dropdown'
 // import Cookies from 'js-cookie'
+import uploadImage from '../components/uploadImage'
 
 export default {
   name: 'authorization',
   components: {
-    dropdown: dropdown
+    uploadImage,
+    dropdown
   },
   data () {
     return {
       userInfo: {},
+      pic: '',
       formValidate: {
         state: 'start', // 状态
         name: '',
@@ -310,6 +318,20 @@ export default {
     }
   },
   methods: {
+    uploadCoachPic (image) {
+      let self = this
+      self.loading = true
+      self.pic = image // 教练头像
+      let data = {
+        contract: self.pic
+      }
+      uAxios.post(`users/${self.id}`, data)
+        .then(res => {
+          console.log(this.information)
+          self.$Message.info('已上传')
+          self.loading = false
+        })
+    },
     handleCheckAll () {
       if (this.indeterminate) {
         this.checkAll = false
@@ -368,6 +390,7 @@ export default {
       uAxios.get(`users/${self.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           self.userInfo = res.data.data.user
+          self.pic = self.userInfo.profile.contract
           console.log(self.userInfo)
           let result = res.data.data
           if (result.data) {

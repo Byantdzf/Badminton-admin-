@@ -318,7 +318,7 @@ export default {
                     this.TicketData.price = params.row.price
                     this.ticketId = params.row.id
                     this.showTicket = !this.showTicket
-                    console.log(this.coachId)
+                    console.log(this.ticketId)
                   }
                 }
               }, '编辑'),
@@ -476,6 +476,12 @@ export default {
     }
   },
   methods: {
+    setFn () {
+      this.$router.push({
+        name: 'shopDeduct',
+        query: { id: this.id }
+      })
+    },
     showCoachFn () {
       this.coachName = ''
       this.coachPic = ''
@@ -619,7 +625,7 @@ export default {
       console.log(data)
       // return
       if (this.ticketId) {
-        uAxios.put(`course/tickets/${this.id}`, data)
+        uAxios.put(`course/tickets/${this.ticketId}`, data)
           .then(res => {
             let result = res.data.data
             console.log(result)

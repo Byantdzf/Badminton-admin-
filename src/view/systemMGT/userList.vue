@@ -93,38 +93,40 @@ export default {
           align: 'center',
           editable: true
         },
-        {
-          title: '状态',
-          align: 'center',
-          render: (h, params) => {
-            if (params.row.is_show) {
-              return h('i-switch', {
-                props: {
-                  size: 'large',
-                  value: Boolean(params.row.is_show)
-                },
-                scopedSlots: {
-                  open: () => h('span', '启用'),
-                  close: () => h('span', '禁用')
-                },
-                on: {
-                  'on-change': (value) => {
-                    console.log(value)
-                    let data = {
-                      is_show: value ? '1' : '0'
-                    }
-                    uAxios.post(`users/${params.row.id}`, data)
-                      .then(res => {
-                        if (res.code == 0) {
-                          this.$Message.success('操作成功!')
-                        }
-                      })
-                  }
-                }
-              })
-            }
-          }
-        },
+        // {
+        //   title: '状态',
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     console.log(params.row.is_show)
+        //     let value = params.row.is_show
+        //     if (params.row.is_show) {
+        //       return h('i-switch', {
+        //         props: {
+        //           size: 'large',
+        //           value: params.row.is_show == 'true'
+        //         },
+        //         scopedSlots: {
+        //           open: () => h('span', '启用'),
+        //           close: () => h('span', '禁用')
+        //         },
+        //         on: {
+        //           'on-change': (value) => {
+        //             console.log(value)
+        //             let data = {
+        //               is_show: value ? '1' : '0'
+        //             }
+        //             uAxios.put(`admins/${params.row.id}`, data)
+        //               .then(res => {
+        //                 if (res.code == 0) {
+        //                   this.$Message.success('操作成功!')
+        //                 }
+        //               })
+        //           }
+        //         }
+        //       })
+        //     }
+        //   }
+        // },
         {
           title: '操作',
           key: 'id',

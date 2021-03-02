@@ -10,16 +10,16 @@
 <!--            style="width: 160px; margin-bottom: 22px;"/>-->
 <!--          <span @click="handleSearch">-->
 <!--                    <Button type="warning" icon="ios-search" style="margin-left: 12px; margin-bottom: 22px;">搜索</Button>-->
-                    <Button type="primary" icon="md-add" style="margin-left: 12px; margin-bottom: 22px;" @click="gotoPage('addRole')">新增角色</Button>
+                    <Button type="primary" icon="md-add" style="margin-left: 12px; margin-bottom: 22px;" @click="gotoPage('addRole', 0)">新增角色</Button>
 <!--                </span>-->
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border @on-selection-change="handleSelect"></Table>
           <div style="margin-top:16px;">
             <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
-            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
-              <Option value="启用" label="启用"></Option>
-              <Option value="禁用" label="禁用"></Option>
-            </Select>
-            <Button @click="batchFn()" >确定</Button>
+<!--            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">-->
+<!--              <Option value="启用" label="启用"></Option>-->
+<!--              <Option value="禁用" label="禁用"></Option>-->
+<!--            </Select>-->
+<!--            <Button @click="batchFn()" >确定</Button>-->
           </div>
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
                 style="margin-top:30px;margin-bottom:30px;"  show-elevator></Page>
@@ -50,11 +50,11 @@ export default {
       id: '',
       ids: [],
       orgColumns: [
-        {
-          type: 'selection',
-          width: 60,
-          align: 'center'
-        },
+        // {
+        //   type: 'selection',
+        //   width: 60,
+        //   align: 'center'
+        // },
         {
           title: '角色ID',
           key: 'id',
@@ -74,41 +74,79 @@ export default {
           align: 'center',
           editable: true
         },
-        {
-          title: '状态',
-          key: 'created_at',
-          align: 'center',
-          render: (h, params) => {
-            if (params.row.is_show) {
-              return h('i-switch', {
-                props: {
-                  size: 'large',
-                  value: Boolean(params.row.is_show)
-                },
-                scopedSlots: {
-                  open: () => h('span', '启用'),
-                  close: () => h('span', '禁用')
-                },
-                on: {
-                  'on-change': (value) => {
-                    this.$Message.success('无接口!')
-                    return
-                    console.log(value)
-                    let data = {
-                      is_show: value
-                    }
-                    uAxios.post(`users/${params.row.id}`, data)
-                      .then(res => {
-                        if (res.code == 0) {
-                          this.$Message.success('操作成功!')
-                        }
-                      })
-                  }
-                }
-              })
-            }
-          }
-        },
+        // {
+        //   title: '状态',
+        //   key: 'type',
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     let isShow = ''
+        //     if (params.row.is_show == '1') {
+        //       isShow = true
+        //     } else {
+        //       isShow = false
+        //     }
+        //     if (params.row.is_show) {
+        //       return h('i-switch', {
+        //         props: {
+        //           size: 'large',
+        //           value: isShow
+        //         },
+        //         scopedSlots: {
+        //           open: () => h('span', '启用'),
+        //           close: () => h('span', '禁用')
+        //         },
+        //         on: {
+        //           'on-change': (value) => {
+        //             let data = {
+        //               is_show: value ? '1' : '0'
+        //             }
+        //             uAxios.post(`users/${params.row.id}`, data)
+        //               .then(res => {
+        //                 if (res.code == 0) {
+        //                   this.$Message.success('操作成功!')
+        //                 }
+        //               })
+        //           }
+        //         }
+        //       })
+        //     }
+        //   }
+        // },
+        // {
+        //   title: '状态',
+        //   key: 'created_at',
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     if (params.row.is_show) {
+        //       return h('i-switch', {
+        //         props: {
+        //           size: 'large',
+        //           value: Boolean(params.row.is_show)
+        //         },
+        //         scopedSlots: {
+        //           open: () => h('span', '启用'),
+        //           close: () => h('span', '禁用')
+        //         },
+        //         on: {
+        //           'on-change': (value) => {
+        //             this.$Message.success('无接口!')
+        //             return
+        //             console.log(value)
+        //             let data = {
+        //               is_show: value
+        //             }
+        //             uAxios.post(`users/${params.row.id}`, data)
+        //               .then(res => {
+        //                 if (res.code == 0) {
+        //                   this.$Message.success('操作成功!')
+        //                 }
+        //               })
+        //           }
+        //         }
+        //       })
+        //     }
+        //   }
+        // },
         {
           title: '创建时间',
           key: 'created_at',
@@ -131,8 +169,8 @@ export default {
                 on: {
                   click: () => {
                     this.$router.push({
-                      name: 'addAuthorizationUser',
-                      query: 'id=12'
+                      name: 'addRole',
+                      query: { id: params.row.id }
                     })
                   }
                 }
@@ -168,8 +206,20 @@ export default {
     gotoPage (title) {
       this.$router.push({
         name: title,
-        query: { id: '12' }
+        query: {}
       })
+    },
+    removeAdmin (id, index) {
+      let self = this
+      self.loading = true
+      uAxios.get(`roles?page=${page}&keyword=${self.searchKeyword}`)
+        .then(res => {
+          let result = res.data.data
+          self.information = result.data
+          self.orgTotal = result.total
+          console.log(this.information)
+          self.loading = false
+        })
     },
     handleSelect (selection) {
       let ids = []

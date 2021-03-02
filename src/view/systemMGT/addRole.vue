@@ -130,22 +130,11 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`admin/admins?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`roles/${self.id}`)
         .then(res => {
-          let result = res.data.data
-          if (result.data) {
-            self.information = result.data.map((item) => {
-              let { user } = item
-              user.adminId = item.id
-              user.created_at = item.created_at
-              user.sex = user.sex == 1 ? '男' : '女'
-              user.type = user.type == 'single' ? '单身' : '介绍人'
-              user.admin_type = item.type == 'SUPER' ? '超级管理员' : `《${item.paas.title}》管理员`
-              return user
-            })
-            self.orgTotal = result.total
-            console.log(this.information)
-          }
+          console.log(res.data)
+          this.formValidate.account = res.data.data.name
+          this.formValidate.desc = res.data.data.description
           self.loading = false
         })
     },
@@ -154,7 +143,11 @@ export default {
     }
   },
   mounted () {
-    this.getlist(1)
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id
+      this.getlist(1)
+      // this.title = '编辑门店详情'
+    }
     console.log(this.$route.query)
   }
 }

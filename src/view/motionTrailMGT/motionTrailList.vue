@@ -103,18 +103,18 @@ export default {
           align: 'center',
           editable: true
         },
-        // {
-        //   title: '教练名称',
-        //   align: 'center',
-        //   render: (h, params) => {
-        //     if (params.row.other_user) {
-        //       return h('span', {
-        //       }, params.row.other_user.name)
-        //     } else {
-        //       return h('span', '未获取')
-        //     }
-        //   }
-        // },
+        {
+          title: '教练名称',
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.other_user) {
+              return h('span', {
+              }, params.row.other_user.name)
+            } else {
+              return h('span', '未获取')
+            }
+          }
+        },
         // {
         //   title: '评星等级',
         //   key: 'store_name',
