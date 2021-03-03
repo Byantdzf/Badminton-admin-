@@ -11,16 +11,16 @@
           <span >
                     <Button type="warning" icon="ios-search" style="margin-left: 12px; margin-bottom: 22px;" @click="handleSearch">搜索</Button>
                     <Button type="primary" icon="md-add" style="margin-left: 12px; margin-bottom: 22px;" @click="gotoPage('addAuthorizationUser')">新增管理员</Button>
-                    <Button type="error" icon="ios-trash-outline" style="margin-left: 12px; margin-bottom: 22px;" @click="deleteUser()">批量删除</Button>
+<!--                    <Button type="error" icon="ios-trash-outline" style="margin-left: 12px; margin-bottom: 22px;" @click="deleteUser()">批量删除</Button>-->
                 </span>
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border @on-selection-change="handleSelect"></Table>
           <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll" style="margin-right: 22px;">全选</Checkbox>
-            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">
-              <Option value="启用" label="启用"></Option>
-              <Option value="禁用" label="禁用"></Option>
-            </Select>
-            <Button @click="batchFn()" >确定</Button>
+<!--            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll" style="margin-right: 22px;">全选</Checkbox>-->
+<!--            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">-->
+<!--              <Option value="启用" label="启用"></Option>-->
+<!--              <Option value="禁用" label="禁用"></Option>-->
+<!--            </Select>-->
+<!--            <Button @click="batchFn()" >确定</Button>-->
           </div>
           <Page :total="orgTotal" @on-change="handlePage" :page-size="15"
                 style="margin-top:30px;margin-bottom:30px;"  show-elevator></Page>
@@ -51,11 +51,11 @@ export default {
       id: '',
       userListId: [],
       orgColumns: [
-        {
-          type: 'selection',
-          width: 60,
-          align: 'center'
-        },
+        // {
+        //   type: 'selection',
+        //   width: 60,
+        //   align: 'center'
+        // },
         {
           title: '管理员账号',
           key: 'account',
@@ -133,41 +133,41 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('Button', {
-                props: {
-                  type: 'primary'
-                },
-                style: {
-                  marginRight: '8px'
-                },
-                on: {
-                  click: () => {
-                    this.$router.push({
-                      name: 'addAuthorizationUser',
-                      query: { id: params.row.id }
-                    })
-                  }
-                }
-              }, '编辑')
               // h('Button', {
               //   props: {
-              //     type: 'error'
+              //     type: 'primary'
+              //   },
+              //   style: {
+              //     marginRight: '8px'
               //   },
               //   on: {
               //     click: () => {
-              //       this.$Modal.confirm({
-              //         title: '温馨提示',
-              //         content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除权限?</p>`,
-              //         onOk: () => {
-              //           this.removeAdmin(params.row.adminId, params.index)
-              //         },
-              //         onCancel: () => {
-              //           console.log('点击了取消')
-              //         }
+              //       this.$router.push({
+              //         name: 'addAuthorizationUser',
+              //         query: { id: params.row.id }
               //       })
               //     }
               //   }
-              // }, '移除')
+              // }, '编辑'),
+              h('Button', {
+                props: {
+                  type: 'error'
+                },
+                on: {
+                  click: () => {
+                    this.$Modal.confirm({
+                      title: '温馨提示',
+                      content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除管理员权限?</p>`,
+                      onOk: () => {
+                        this.deleteUser(params.row.id, params.index)
+                      },
+                      onCancel: () => {
+                        console.log('点击了取消')
+                      }
+                    })
+                  }
+                }
+              }, '移除')
             ])
           }
         }
@@ -190,28 +190,24 @@ export default {
       this.userListId = ids
       console.log(selection, 'asd')
     },
-    deleteUser () {
+    deleteUser (id, index) {
       let vm = this
-      if (vm.userListId.length < 1) return vm.$Message.error('请先选择你要删除的用户!')
-      console.log(vm.userListId)
-      vm.$Modal.confirm({
-        title: '温馨提示',
-        content: `<p>是否将选中用户删除?</p>`,
-        onOk: () => {
-          uAxios.delete(`admins`, vm.userListId)
-            .then(res => {
-              if (res.code == 0) {
-                vm.$Message.success('操作成功!')
-                vm.page = 1
-                vm.list = []
-                vm.getlist()
-              }
-            })
-        },
-        onCancel: () => {
-          console.log('点击了取消')
-        }
-      })
+      console.log(id, index)
+      let userListId = []
+      userListId.push(id)
+      console.log(userListId)
+      let data = {
+        admin_ids: userListId
+      }
+      uAxios.delete(`admins/${id}`, data)
+        .then(res => {
+          if (res.data.code == 0) {
+            vm.$Message.success('操作成功!')
+            vm.page = 1
+            vm.list = []
+            vm.getlist()
+          }
+        })
     },
     handleSelectAll (status) {
       this.$refs.selection.selectAll(this.CheckboxValue)

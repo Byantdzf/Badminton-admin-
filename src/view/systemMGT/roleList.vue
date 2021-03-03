@@ -14,7 +14,7 @@
 <!--                </span>-->
           <Table :loading="loading" ref="selection"  :columns="orgColumns" :data="information" style="width: 100%;" border @on-selection-change="handleSelect"></Table>
           <div style="margin-top:16px;">
-            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>
+<!--            <Checkbox v-model="CheckboxValue" @on-change="handleSelectAll(true)" style="margin-right: 22px;">全选</Checkbox>-->
 <!--            <Select v-model="SelectValue" style="width:100px;margin-right: 16px;">-->
 <!--              <Option value="启用" label="启用"></Option>-->
 <!--              <Option value="禁用" label="禁用"></Option>-->

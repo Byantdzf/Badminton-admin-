@@ -81,23 +81,23 @@ export default {
           return this.$Message.error('你有信息项未填写，请先填写!')
         }
       }
-      if(vm.formValidate.confirmPassword !== vm.formValidate.password) return this.$Message.error('2次密码不一致!')
+      if (vm.formValidate.confirmPassword !== vm.formValidate.password) return this.$Message.error('2次密码不一致!')
       uAxios.post(`admins`, vm.formValidate)
         .then(res => {
           console.log(res)
-          if(res.code == 0){
+          if (res.data.code == 0) {
             this.$Message.success('创建成功!')
-            this.$router.go(-1) ;//返回上一层
+            this.$router.go(-1) // 返回上一层
           }
         })
 
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.$Message.success('Success!')
-        } else {
-          this.$Message.error('Fail!')
-        }
-      })
+      // this.$refs[name].validate((valid) => {
+      //   if (valid) {
+      //     this.$Message.success('创建成功!')
+      //   } else {
+      //     this.$Message.error('Fail!')
+      //   }
+      // })
       console.log(this.formValidate)
     },
     getBack () {
