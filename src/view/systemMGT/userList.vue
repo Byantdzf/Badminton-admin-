@@ -133,22 +133,22 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              // h('Button', {
-              //   props: {
-              //     type: 'primary'
-              //   },
-              //   style: {
-              //     marginRight: '8px'
-              //   },
-              //   on: {
-              //     click: () => {
-              //       this.$router.push({
-              //         name: 'addAuthorizationUser',
-              //         query: { id: params.row.id }
-              //       })
-              //     }
-              //   }
-              // }, '编辑'),
+              h('Button', {
+                props: {
+                  type: 'primary'
+                },
+                style: {
+                  marginRight: '8px'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      name: 'addAuthorizationUser',
+                      query: { id: params.row.id }
+                    })
+                  }
+                }
+              }, '编辑'),
               h('Button', {
                 props: {
                   type: 'error'

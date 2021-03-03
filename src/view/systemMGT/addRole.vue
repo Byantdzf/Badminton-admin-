@@ -20,21 +20,10 @@
       </FormItem>
       <FormItem>
         <div style="border-bottom: 1px solid #e9e9e9;padding-bottom:6px;margin-bottom:6px;">
-          <Checkbox
-            :indeterminate="indeterminate"
-            :value="checkAll"
-            @click.prevent.native="handleCheckAll">访问页面管理</Checkbox>
+          访问页面管理
         </div>
-        <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
-          <Checkbox label="系统管理"></Checkbox>
-          <Checkbox label="用户管理"></Checkbox>
-          <Checkbox label="门店管理"></Checkbox>
-          <Checkbox label="预约管理"></Checkbox>
-          <Checkbox label="订单管理"></Checkbox>
-          <Checkbox label="评价管理"></Checkbox>
-          <Checkbox label="财务管理"></Checkbox>
-          <Checkbox label="网课管理"></Checkbox>
-          <Checkbox label="运动轨迹管理"></Checkbox>
+        <CheckboxGroup v-model="rolesA" @on-change="checkAllGroupChange">
+          <Checkbox :label="item" v-for="item in roles"></Checkbox>
         </CheckboxGroup>
       </FormItem>
       <FormItem>
@@ -71,7 +60,10 @@ export default {
       },
       indeterminate: true,
       checkAll: false,
-      checkAllGroup: ['香蕉', '西瓜']
+      roles: [],
+      roleList: [],
+      roleListV2: [],
+      rolesA: []
     }
   },
   methods: {
@@ -82,12 +74,6 @@ export default {
         this.checkAll = !this.checkAll
       }
       this.indeterminate = false
-
-      if (this.checkAll) {
-        this.checkAllGroup = ['香蕉', '苹果', '西瓜']
-      } else {
-        this.checkAllGroup = []
-      }
     },
     checkAllGroupChange (data) {
       if (data.length === 3) {
@@ -102,14 +88,37 @@ export default {
       }
     },
     handleSubmit (name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.$Message.success('Success!')
-        } else {
-          this.$Message.error('Fail!')
+      let ids = []
+      for (let item of this.roleList) {
+        for (let itemV2 of this.rolesA) {
+          if (item.name == itemV2) {
+            console.log(item.id)
+            ids.push(item.id)
+          }
         }
-      })
-      console.log(this.formValidate)
+      }
+      let data = {
+        name: this.formValidate.account,
+        description: this.formValidate.desc,
+        is_show: 1,
+        permission_ids: ids
+      }
+      if (!this.formValidate.account) return this.$Message.error('请输入角色名称！')
+      if (!this.formValidate.desc) return this.$Message.error('请输入备注！')
+      if (ids.length < 1) return this.$Message.error('请选择访问页面！')
+      if (this.id) {
+        uAxios.put(`roles/${this.id}`, data)
+          .then(res => {
+            this.$Message.success('修改成功')
+            this.$router.go(-1)
+          })
+      } else {
+        uAxios.post(`roles`, data)
+          .then(res => {
+            this.$Message.success('添加成功')
+            this.$router.go(-1)
+          })
+      }
     },
     getBack () {
       this.$router.back(-1)
@@ -135,6 +144,12 @@ export default {
           console.log(res.data)
           this.formValidate.account = res.data.data.name
           this.formValidate.desc = res.data.data.description
+          let permissions = res.data.data.permissions
+          this.roleListV2 = permissions
+          for (let item of permissions) {
+            this.rolesA.push(item.name)
+          }
+          console.log(this.rolesA)
           self.loading = false
         })
     },
@@ -146,8 +161,17 @@ export default {
     if (this.$route.query.id) {
       this.id = this.$route.query.id
       this.getlist(1)
-      // this.title = '编辑门店详情'
     }
+    uAxios.get(`permissions?nopage=1`)
+      .then(res => {
+        let { data } = res.data
+        console.log(data)
+        this.roleList = data
+        for (let item of data) {
+          this.roles.push(item.name)
+        }
+        console.log(this.roles)
+      })
     console.log(this.$route.query)
   }
 }

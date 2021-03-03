@@ -185,7 +185,7 @@ export default {
                       title: '温馨提示',
                       content: `<p>是否将 <span class="_bold">${params.row.name}</span> 移除权限?</p>`,
                       onOk: () => {
-                        this.removeAdmin(params.row.adminId, params.index)
+                        this.removeAdmin(params.row.id, params.index)
                       },
                       onCancel: () => {
                         console.log('点击了取消')
@@ -212,7 +212,10 @@ export default {
     removeAdmin (id, index) {
       let self = this
       self.loading = true
-      uAxios.get(`roles?page=${page}&keyword=${self.searchKeyword}`)
+      let data = {
+        role_ids: id
+      }
+      uAxios.delete(`roles/${id}`, data)
         .then(res => {
           let result = res.data.data
           self.information = result.data

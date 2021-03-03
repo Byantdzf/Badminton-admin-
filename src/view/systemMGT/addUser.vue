@@ -1,13 +1,13 @@
 <template>
   <Card>
     <Form ref="formValidate" :model="formValidate" :label-width="80">
-      <FormItem label="启用状态" prop="state">
-        <RadioGroup v-model="formValidate.state">
-          <Radio label="start">启用</Radio>
-          <Radio label="stop">禁用</Radio>
-        </RadioGroup>
-        <span style="margin-left: 12px;">*不启用则无法使用该账号登录</span>
-      </FormItem>
+<!--      <FormItem label="启用状态" prop="state">-->
+<!--        <RadioGroup v-model="formValidate.state">-->
+<!--          <Radio label="start">启用</Radio>-->
+<!--          <Radio label="stop">禁用</Radio>-->
+<!--        </RadioGroup>-->
+<!--        <span style="margin-left: 12px;">*不启用则无法使用该账号登录</span>-->
+<!--      </FormItem>-->
       <FormItem label="账号" prop="account">
         <Input v-model="formValidate.account" placeholder="请输入" style="width: 320px;"></Input>
         <span style="margin-left: 12px;">*支持字母、下划线、数字，初次设置后不可修改</span>
@@ -69,6 +69,7 @@ export default {
         confirmPassword: '', // 确认密码
         remark: ''
       },
+      id: '',
       roleList: [] // 角色列表
     }
   },
@@ -82,23 +83,27 @@ export default {
         }
       }
       if (vm.formValidate.confirmPassword !== vm.formValidate.password) return this.$Message.error('2次密码不一致!')
-      uAxios.post(`admins`, vm.formValidate)
-        .then(res => {
-          console.log(res)
-          if (res.data.code == 0) {
-            this.$Message.success('创建成功!')
-            this.$router.go(-1) // 返回上一层
-          }
-        })
-
-      // this.$refs[name].validate((valid) => {
-      //   if (valid) {
-      //     this.$Message.success('创建成功!')
-      //   } else {
-      //     this.$Message.error('Fail!')
-      //   }
-      // })
-      console.log(this.formValidate)
+      if (!this.id) {
+        uAxios.post(`admins`, vm.formValidate)
+          .then(res => {
+            console.log(res)
+            if (res.data.code == 0) {
+              this.$Message.success('创建成功!')
+              this.$router.go(-1) // 返回上一层
+            }
+          })
+        console.log(this.formValidate)
+      } else {
+        uAxios.put(`admins/${this.id}`, vm.formValidate)
+          .then(res => {
+            console.log(res)
+            if (res.data.code == 0) {
+              this.$Message.success('修改成功!')
+              this.$router.go(-1) // 返回上一层
+            }
+          })
+        console.log(this.formValidate)
+      }
     },
     getBack () {
       this.$router.back(-1)
@@ -119,7 +124,29 @@ export default {
     getlist (page) {
       let self = this
       self.loading = true
-      uAxios.get(`roles?page=${page}&keyword=${self.searchKeyword}`)
+      uAxios.get(`admins/${self.id}?page=${page}&keyword=${self.searchKeyword}`)
+        .then(res => {
+          let result = res.data.data
+          console.log(result)
+          this.formValidate = {
+            name: result.name,
+            email: result.email,
+            role_id: result.role_id,
+            mobile: result.mobile,
+            account: result.account, // 账号
+            // password: result.role_id, // 密码
+            // confirmPassword: result.role_id, // 确认密码
+            remark: result.remark
+          }
+          // self.roleList = result.data
+          // self.loading = false
+          // console.log(self.roleList)
+        })
+    },
+    getlistV2 (page) {
+      let self = this
+      self.loading = true
+      uAxios.get(`roles/${self.id}?page=${page}&keyword=${self.searchKeyword}`)
         .then(res => {
           let result = res.data.data
           self.roleList = result.data
@@ -132,7 +159,11 @@ export default {
     }
   },
   mounted () {
-    this.getlist(1)
+    this.getlistV2()
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id
+      this.getlist(1)
+    }
     console.log(this.$route.query)
   }
 }
