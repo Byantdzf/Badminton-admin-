@@ -55,7 +55,7 @@
           <Input v-model="formItem2.name" placeholder="请输入..." style="width:200px;"></Input>
         </FormItem>
         <FormItem label="时间：">
-          <DatePicker type="datetimerange" v-model="day" placeholder="选择查询日期" style="width:200px;"></DatePicker>
+          <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" v-model="day" placeholder="选择查询日期" style="width:200px;"></DatePicker>
         </FormItem>
 <!--        <FormItem label="有效天数">-->
 <!--          <Input v-model="formItem2.valid_day"  placeholder="请输入..." style="width:200px;"></Input>-->
